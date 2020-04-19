@@ -1,13 +1,12 @@
 -- This class helps in the source manipulation
 CustomOSTXSource = {}
-local C = CustomOSTXSource
 
 -- Get the XAudio constants
-C.MUSIC = XAudio.Source.MUSIC
-C.SOUND_EFFECT = XAudio.Source.SOUND_EFFECT
+CustomOSTXSource.MUSIC = XAudio.Source.MUSIC
+CustomOSTXSource.SOUND_EFFECT = XAudio.Source.SOUND_EFFECT
 
 -- Get an XAudio source with the wanted hook to handle actions
-function C:create_source (buffer, event)
+function CustomOSTXSource:create_source (buffer, event)
     res = XAudio.Source:new(buffer)
 
     res._cost_meta = "CustomOSTXSourceInstance"
@@ -23,14 +22,14 @@ function C:create_source (buffer, event)
     
     -- Create the hook to make custom update
     Hooks:PostHook(res, "update", "CustomOSTXAudio" .. res._cost_event .. "Update", function (self, t, dt)
-        C:custom_update(self, t, dt)
+        CustomOSTXSource:custom_update(self, t, dt)
     end)
     
     return res
 end
 
 -- Close a source and delete the hook
-function C:close_source (src)
+function CustomOSTXSource:close_source (src)
     if src._cost_meta == "CustomOSTXSourceInstance" then
         Hooks:RemovePostHook("CustomOSTXAudio" .. src._cost_event .. "Update")
         src:close()
@@ -38,7 +37,7 @@ function C:close_source (src)
 end
 
 -- Custom function to make a fade in of a track
-function C:fade_in (src, target_vol, duration)
+function CustomOSTXSource:fade_in (src, target_vol, duration)
     src:set_volume(0)
     src._cost_fade_in_cursor = 0
     src._cost_fade_target_volume = target_vol
@@ -46,14 +45,14 @@ function C:fade_in (src, target_vol, duration)
 end
 
 -- Custom function to make a fade out of a track
-function C:fade_out (src, duration)
+function CustomOSTXSource:fade_out (src, duration)
     src._cost_fade_out_cursor = 0
     src._cost_fade_start_volume = src:get_volume()
     src._cost_fade_out_duration = duration
 end
 
 -- Update the XAudio source
-function C:custom_update (self, t, dt)
+function CustomOSTXSource:custom_update (self, t, dt)
     -- Fade out handling
     if self._cost_fade_out_cursor ~= nil then
         self._cost_fade_out_cursor = self._cost_fade_out_cursor + dt
@@ -66,7 +65,7 @@ function C:custom_update (self, t, dt)
             self._cost_fade_out_cursor = nil
             self._cost_fade_out_duration = nil
             self._cost_fade_start_volume = nil
-            C:close_source(self)
+            CustomOSTXSource:close_source(self)
         end
     end
 

@@ -1,9 +1,6 @@
--- Define config
-local source_dir_path = ModPath .. "src/"
-local tracks_dir_path = ModPath .. "tracks/"
-local do_hooks = false
-
 -- Load all mod files
+local source_dir_path = ModPath .. "src/"
+
 if file.DirectoryExists( source_dir_path ) then
     local source_files = file.GetFiles( source_dir_path )
 
@@ -23,8 +20,7 @@ end
 blt.xaudio.setup()
 
 -- Load all custom tracks
-local custom_tracks_map = {}
-local custom_tracks_ordered = {}
+local tracks_dir_path = ModPath .. "tracks/"
 
 if file.DirectoryExists( tracks_dir_path ) then
     local tracks_dir = file.GetDirectories(tracks_dir_path)
@@ -33,31 +29,27 @@ if file.DirectoryExists( tracks_dir_path ) then
 
         dir = dir .. "/"
         local track_json_file = tracks_dir_path .. dir .. "track.json"
-        local new_track = CustomOSTTrack:create_from_file(track_json_file, tracks_dir_path .. dir)
-
-        if new_track ~= nil then
-            custom_tracks_map[new_track.id] = new_track
-            table.insert(custom_tracks_ordered, new_track)
-        end
+        CustomOSTTracks:create_from_file(track_json_file, tracks_dir_path .. dir)
         
     end
+
+    smart_print(CustomOSTTracks._custom_tracks_map)
 else
     CustomOSTLogger:log_err( "Tracks directory does not exists, please create the directory 'CustomOST/tracks/'" )
 end
 
--- Export all tracks in the globals
-Global._custom_ost_tracks_map = custom_tracks_map
-Global._custom_ost_tracks_ordered = custom_tracks_ordered
+-- Create all game hooks to make this mod works
+local do_hooks = false
 
 if do_hooks then
 
     -- Create the hook to insert the custom tracks in the wanted menu
     Hooks:Add("LocalizationManagerPostInit", "CustomOSTTracksLocalization", function()
-        load_tracks_loc()
+        CustomOSTTracks:load_tracks_loc()
     end)
 
     Hooks:PostHook(MusicManager, "init", "CustomOSTTracksTweak", function()
-        add_tracks_tweak()
+        CustomOSTTracks:add_tracks_tweak()
     end)
 
     -- Create hooks to make the custom music play
