@@ -1,0 +1,14 @@
+{
+    "name": "Custom OST",
+    "description": "A light mod to add custom heist music with dynamic integration",
+    "author": "Hugo Guerrier",
+    "contact": "hugogguerrier@gmail.com",
+    "version": "0.4",
+
+    "hooks" : [
+        {
+            "hook_id": "lib/setups/gamesetup",
+            "script_path": "Core.lua"
+        }
+    ]
+}
