@@ -1,7 +1,6 @@
 {
     "id": "she_swallowed_burning_coals",
     "volume": 0.8,
-    "fade_transition": false,
     "name": "She swallowed burning coals",
     "events": {
         "setup": {

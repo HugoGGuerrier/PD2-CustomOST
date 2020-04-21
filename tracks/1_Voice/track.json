@@ -1,7 +1,6 @@
 {
     "id": "test_track_voice",
     "volume": 0.8,
-    "fade_transition": false,
     "name": "Voice track",
     "events": {
         "setup": {

@@ -8,13 +8,13 @@ if file.DirectoryExists( source_dir_path ) then
         dofile( source_dir_path .. file )
     end
 else
-    log("[ CustomOST ] [ Error ] : Cannot find the source directory, please reinstall this mod")
+    log("[CustomOST] [Error] : Cannot find the source directory, please reinstall this mod")
 end
 
 -- Verify and start the x audio
 if not XAudio then
-    CustomOSTLogger:log_err("You need XAudio to make this mod work")
-    return nil
+    COSTLogger:log_err("You need XAudio to make this mod work")
+    return
 end
 
 blt.xaudio.setup()
@@ -29,76 +29,106 @@ if file.DirectoryExists( tracks_dir_path ) then
 
         dir = dir .. "/"
         local track_json_file = tracks_dir_path .. dir .. "track.json"
-        CustomOSTTracks:create_from_file(track_json_file, tracks_dir_path .. dir)
+        COSTTracks:create_from_file(track_json_file, tracks_dir_path .. dir)
         
     end
-
-    smart_print(CustomOSTTracks._custom_tracks_map)
 else
-    CustomOSTLogger:log_err( "Tracks directory does not exists, please create the directory 'CustomOST/tracks/'" )
+    COSTLogger:log_err("Tracks directory does not exists, please create the directory 'CustomOST/tracks/'")
 end
 
+-- TEST SECTION
+
+TestClass = class()
+
+function TestClass:init (value)
+    self._val = value
+end
+
+function TestClass:set_val (value)
+    self._val = value
+end
+
+function TestClass:get_val ()
+    return self._val
+end
+
+InheritTest = class(TestClass)
+
+function InheritTest:init(value, id)
+    TestClass.init(self, value)
+    self._id_test = id
+end
+
+function InheritTest:test_func ()
+    log(self._id_test .. " " .. self._val)
+end
+
+test1 = TestClass:new(1)
+test2 = InheritTest:new(2, "test")
+
+test1:set_val(10)
+
+log(test1:get_val())
+test2:test_func()
+
 -- Create all game hooks to make this mod works
-local do_hooks = false
+-- If you just want to test music loading, set this value to "false"
+local do_hooks = true
 
 if do_hooks then
 
-    -- Create the hook to insert the custom tracks in the wanted menu
+    -- Create the hook to insert the custom tracks in the jukebox menu
     Hooks:Add("LocalizationManagerPostInit", "CustomOSTTracksLocalization", function()
-        CustomOSTTracks:load_tracks_loc()
+        COSTTracks:load_tracks_loc()
     end)
 
     Hooks:PostHook(MusicManager, "init", "CustomOSTTracksTweak", function()
-        CustomOSTTracks:add_tracks_tweak()
+        COSTTracks:add_tracks_tweak()
     end)
 
     -- Create hooks to make the custom music play
     Hooks:PostHook(MusicManager, "track_listen_start", "CustomOSTTrackListerStart", function(_, event, track)
-        log("track listen start")
-        CustomOSTMusicManager:track_listen_start(event, track)
+        COSTMusicManager:track_listen_start(event, track)
     end)
 
     Hooks:PostHook(MusicManager, "track_listen_stop", "CustomOSTTrackListenStop", function()
-        log("track listen stop")
-        CustomOSTMusicManager:track_listen_stop()
+        COSTMusicManager:track_listen_stop()
     end)
 
     Hooks:PostHook(MusicManager, "stop", "CustomOSTStop", function()
-        log("stop")
-        CustomOSTMusicManager:stop_custom(false)
+        COSTMusicManager:stop_custom(false)
     end)
 
     Hooks:PostHook(MusicManager, "post_event", "CustomOSTPostEvent", function(_, name)
-        log("post event")
-        CustomOSTMusicManager:post_event(name)
+        COSTMusicManager:post_event(name)
     end)
 
-    -- Create the hooks to make the music integration
+    -- Create the hooks to make the dynamic music integration
     Hooks:PostHook(DialogManager, "_play_dialog", "CustomOSTStartDialog", function ()
-        CustomOSTMusicManager:set_volume_factor(0.45)
+        COSTMusicManager:set_volume_factor(0.5)
     end)
 
     Hooks:PostHook(DialogManager, "_stop_dialog", "CustomOSTStopDialog", function ()
-        CustomOSTMusicManager:set_volume_factor(1)
+        COSTMusicManager:set_volume_factor(1)
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "post_event", "CustomOSTVoiceBriefingTalk", function ()
-        CustomOSTMusicManager:set_volume_factor(0.4)
+        COSTMusicManager:set_volume_factor(0.4)
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "post_event_simple", "CustomOSTVoiceBriefingTalk2", function ()
-        CustomOSTMusicManager:set_volume_factor(0.4)
+        COSTMusicManager:set_volume_factor(0.4)
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "stop_event", "CustomOSTVoiceBriefingStop", function ()
-        CustomOSTMusicManager:set_volume_factor(1)
+        COSTMusicManager:set_volume_factor(1)
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "_clear_event", "CustomOSTVoiceBriefingStop2", function ()
-        CustomOSTMusicManager:set_volume_factor(1)
+        COSTMusicManager:set_volume_factor(1)
     end)
 
 end
 
 -- Tell the developer if the core ended with success
-CustomOSTLogger:dev_log("Core ended correctly")
+COSTLogger:dev_log("Core ended correctly")

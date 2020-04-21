@@ -1,13 +1,12 @@
-CustomOSTTracks = {}
+COSTTracks = {}
 
-CustomOSTTracks._custom_tracks_map = {}
-CustomOSTTracks._custom_tracks_ordered = {}
+COSTTracks.custom_tracks_map = {}
+COSTTracks.custom_tracks_ordered = {}
 
-function CustomOSTTracks:init_track (track)
+function COSTTracks:init_track (track)
     track.id = nil
-    track._meta = "CustomOSTTrack"
+    track.cost_type = "CustomOSTTrack"
     track.volume = 1
-    track.fade_transition = false
     track.name = "Default track name"
     track.dir = nil
     track.events_buffers = nil
@@ -32,14 +31,14 @@ function CustomOSTTracks:init_track (track)
 end
 
 -- Create a new track from a json file and the directory of this file
-function CustomOSTTracks:create_from_file (track_file, dir)
+function COSTTracks:create_from_file (track_file, dir)
     -- Init the result
     local new_track = {}
-    CustomOSTTracks:init_track(new_track)
+    COSTTracks:init_track(new_track)
 
     -- Check the track file existence
     if not file:FileExists(track_file) then
-        CustomOSTLogger:log_err("Cannot load track from folder " .. dir .. " track.json file is missing")
+        COSTLogger:log_err("Cannot load track from folder " .. dir .. " track.json file is missing")
         return nil
     end
 
@@ -52,28 +51,29 @@ function CustomOSTTracks:create_from_file (track_file, dir)
     new_track.name = track_obj.name
     new_track.id = track_obj.id
     new_track.volume = track_obj.volume or 1
-    new_track.fade_transition = track_obj.fade_transition or false
     new_track.dir = dir
     
     if not new_track.id or not new_track.name then
-        CustomOSTLogger:log_err("Cannot load track from folder " .. dir .. " track.json file is malformed, you need at leat a 'name' and an 'id'")
+        COSTLogger:log_err("Cannot load track from folder " .. dir .. " track.json file is malformed, you need at leat a 'name' and an 'id'")
         return nil
     end
+
+    -- TODO : Verify that the track id is the only one
 
     for event, sources_path in pairs(track_obj.events) do
         new_track.events_files[event].start_source_file = track_obj.events[event].start_source
         new_track.events_files[event].source_file = track_obj.events[event].source
     end
 
-    if CustomOSTTracks:load_tracks_files(new_track) then
-        CustomOSTLogger:dev_log(new_track.name .. " loaded !")
-        CustomOSTTracks._custom_tracks_map[new_track.id] = new_track
-        table.insert(CustomOSTTracks._custom_tracks_ordered, new_track)
+    if COSTTracks:load_tracks_files(new_track) then
+        COSTLogger:dev_log(new_track.name .. " loaded !")
+        COSTTracks.custom_tracks_map[new_track.id] = new_track
+        table.insert(COSTTracks.custom_tracks_ordered, new_track)
     end
 end
 
 -- Load all the track files of the track object
-function CustomOSTTracks:load_tracks_files (track)
+function COSTTracks:load_tracks_files (track)
     -- Make a tmp var to avoid buffer loading problems
     local events_buffers_tmp = {
         setup = {
@@ -103,9 +103,9 @@ function CustomOSTTracks:load_tracks_files (track)
         if start_source_path then
             if file:FileExists(start_source_path) then 
                 events_buffers_tmp[event].start_source_buffer = XAudio.Buffer:new(start_source_path)
-                CustomOSTLogger:dev_log("Load " .. track.id .. " - " .. event .. "(start)")
+                COSTLogger:dev_log("Load " .. track.id .. " - " .. event .. "(start)")
             else
-                CustomOSTLogger:log_warn("File " .. start_source_path .. " is missing or unreadable")
+                COSTLogger:log_warn("File " .. start_source_path .. " is missing or unreadable")
             end
         end
 
@@ -113,13 +113,13 @@ function CustomOSTTracks:load_tracks_files (track)
         if source_path then
             if file:FileExists(source_path) then
                 events_buffers_tmp[event].source_buffer = XAudio.Buffer:new(source_path)
-                CustomOSTLogger:dev_log("Load " .. track.id .. " - " .. event)
+                COSTLogger:dev_log("Load " .. track.id .. " - " .. event)
             else
-                CustomOSTLogger:log_err("File " .. source_path .. " is missing")
+                COSTLogger:log_err("File " .. source_path .. " is missing")
                 return false
             end
         else
-            CustomOSTLogger:log_err("Track " .. track.name .. " does not have source file for event " .. event .. ", you need at least one source file for each event")
+            COSTLogger:log_err("Track " .. track.name .. " does not have source file for event " .. event .. ", you need at least one source file for each event")
             return false
         end
     end
@@ -130,10 +130,10 @@ function CustomOSTTracks:load_tracks_files (track)
 end
 
 -- Add the track title in the localization to display in the tracks menu
-function CustomOSTTracks:load_tracks_loc ()
+function COSTTracks:load_tracks_loc ()
     local content = {}
-    for _, track in pairs(CustomOSTTracks._custom_tracks_ordered) do
-        if track._meta == "CustomOSTTrack" then
+    for _, track in pairs(COSTTracks.custom_tracks_ordered) do
+        if track.cost_type == "CustomOSTTrack" then
             local menu_jukebox_id = "menu_jukebox_" .. track.id
             local menu_jukebox_screen_id = "menu_jukebox_screen_" .. track.id
             content[menu_jukebox_id] = track.name
@@ -141,15 +141,15 @@ function CustomOSTTracks:load_tracks_loc ()
         end
     end
     LocalizationManager:add_localized_strings(content, true)
-    CustomOSTLogger:dev_log("Tracks localization loaded !")
+    COSTLogger:dev_log("Tracks localization loaded !")
 end
 
 -- Add the tracks tweaks to make them apear in the game menu
-function CustomOSTTracks:add_tracks_tweak()
-    for _, track in pairs(CustomOSTTracks._custom_tracks_ordered) do
-        if track._meta == "CustomOSTTrack" then
+function COSTTracks:add_tracks_tweak()
+    for _, track in pairs(COSTTracks.custom_tracks_ordered) do
+        if track.cost_type == "CustomOSTTrack" then
             table.insert(tweak_data.music.track_list, {track = track.id})
-            CustomOSTLogger:dev_log("Track tweaks loaded !")
+            COSTLogger:dev_log("Track tweaks loaded !")
         end
     end
 end

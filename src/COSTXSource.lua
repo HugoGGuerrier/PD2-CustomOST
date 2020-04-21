@@ -1,0 +1,2 @@
+COSTXSource = class(XAudio.Source)
+
