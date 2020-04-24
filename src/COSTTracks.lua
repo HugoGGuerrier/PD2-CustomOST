@@ -9,6 +9,8 @@ function COSTTracks:init_track (track)
     track.volume = 1
     track.name = "Default track name"
     track.dir = nil
+    track.fade_transition = false
+    track.fade_duration = 2
     track.events_buffers = nil
     track.events_files = {
         setup = {
@@ -51,6 +53,7 @@ function COSTTracks:create_from_file (track_file, dir)
     new_track.name = track_obj.name
     new_track.id = track_obj.id
     new_track.volume = track_obj.volume or 1
+    new_track.fade_transition = track_obj.fade_transition or false
     new_track.dir = dir
     
     if not new_track.id or not new_track.name then

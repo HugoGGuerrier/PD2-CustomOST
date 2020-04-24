@@ -20,7 +20,7 @@ end
 blt.xaudio.setup()
 
 -- Load all custom tracks
-local tracks_dir_path = ModPath .. "tracks/"
+local tracks_dir_path = "mods/CustomTracks/"
 
 if file.DirectoryExists( tracks_dir_path ) then
     local tracks_dir = file.GetDirectories(tracks_dir_path)
@@ -35,41 +35,6 @@ if file.DirectoryExists( tracks_dir_path ) then
 else
     COSTLogger:log_err("Tracks directory does not exists, please create the directory 'CustomOST/tracks/'")
 end
-
--- TEST SECTION
-
-TestClass = class()
-
-function TestClass:init (value)
-    self._val = value
-end
-
-function TestClass:set_val (value)
-    self._val = value
-end
-
-function TestClass:get_val ()
-    return self._val
-end
-
-InheritTest = class(TestClass)
-
-function InheritTest:init(value, id)
-    TestClass.init(self, value)
-    self._id_test = id
-end
-
-function InheritTest:test_func ()
-    log(self._id_test .. " " .. self._val)
-end
-
-test1 = TestClass:new(1)
-test2 = InheritTest:new(2, "test")
-
-test1:set_val(10)
-
-log(test1:get_val())
-test2:test_func()
 
 -- Create all game hooks to make this mod works
 -- If you just want to test music loading, set this value to "false"
@@ -105,27 +70,27 @@ if do_hooks then
 
     -- Create the hooks to make the dynamic music integration
     Hooks:PostHook(DialogManager, "_play_dialog", "CustomOSTStartDialog", function ()
-        COSTMusicManager:set_volume_factor(0.5)
+        COSTMusicManager:speek_mission()
     end)
 
     Hooks:PostHook(DialogManager, "_stop_dialog", "CustomOSTStopDialog", function ()
-        COSTMusicManager:set_volume_factor(1)
+        COSTMusicManager:stop_speek()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "post_event", "CustomOSTVoiceBriefingTalk", function ()
-        COSTMusicManager:set_volume_factor(0.4)
+        COSTMusicManager:speek_planning()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "post_event_simple", "CustomOSTVoiceBriefingTalk2", function ()
-        COSTMusicManager:set_volume_factor(0.4)
+        COSTMusicManager:speek_planning()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "stop_event", "CustomOSTVoiceBriefingStop", function ()
-        COSTMusicManager:set_volume_factor(1)
+        COSTMusicManager:stop_speek()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "_clear_event", "CustomOSTVoiceBriefingStop2", function ()
-        COSTMusicManager:set_volume_factor(1)
+        COSTMusicManager:stop_speek()
     end)
 
 end
