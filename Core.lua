@@ -70,27 +70,27 @@ if do_hooks then
 
     -- Create the hooks to make the dynamic music integration
     Hooks:PostHook(DialogManager, "_play_dialog", "CustomOSTStartDialog", function ()
-        COSTMusicManager:speek_mission()
+        COSTMusicManager:speak_mission()
     end)
 
     Hooks:PostHook(DialogManager, "_stop_dialog", "CustomOSTStopDialog", function ()
-        COSTMusicManager:stop_speek()
+        COSTMusicManager:stop_speak()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "post_event", "CustomOSTVoiceBriefingTalk", function ()
-        COSTMusicManager:speek_planning()
+        COSTMusicManager:speak_planning()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "post_event_simple", "CustomOSTVoiceBriefingTalk2", function ()
-        COSTMusicManager:speek_planning()
+        COSTMusicManager:speak_planning()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "stop_event", "CustomOSTVoiceBriefingStop", function ()
-        COSTMusicManager:stop_speek()
+        COSTMusicManager:stop_speak()
     end)
 
     Hooks:PostHook(VoiceBriefingManager, "_clear_event", "CustomOSTVoiceBriefingStop2", function ()
-        COSTMusicManager:stop_speek()
+        COSTMusicManager:stop_speak()
     end)
 
 end

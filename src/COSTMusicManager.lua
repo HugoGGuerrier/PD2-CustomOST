@@ -143,24 +143,44 @@ end
 function COSTMusicManager:set_volume_factor (factor)
     if factor <= 1 and factor >= 0 then
         COSTMusicManager.volume_factor = factor
-        if COSTMusicManager.x_source and COSTMusicManager.x_source:is_active() then
+        if COSTMusicManager.x_source then
             COSTMusicManager.x_source:set_volume(COSTMusicManager.volume_factor * COSTMusicManager.x_source:track_volume())
         end
     end
 end
 
 -- Function to call when someone talk in the preplanning 
-function COSTMusicManager:speek_planning ()
-    -- TODO : Lower the music volume according to the current event
+function COSTMusicManager:speak_planning ()
+    if COSTMusicManager.current_track then
+        log("speek planning")
+        self:set_volume_factor(0.4)
+    end
 end
 
 -- Function to call when someone talk during the mission
-function COSTMusicManager:speek_mission ()
-    -- TODO : Lower the music volume
+function COSTMusicManager:speak_mission ()
+    if COSTMusicManager.current_track then
+        if COSTMusicManager.current_event then
+            log("speak mission")
+            if COSTMusicManager.current_event == "setup" then
+                self:set_volume_factor(0.35)
+            end
+            if COSTMusicManager.current_event == "control" then
+                self:set_volume_factor(0.43)
+            end
+            if COSTMusicManager.current_event == "buildup" then
+                self:set_volume_factor(0.5)
+            end
+            if COSTMusicManager.current_event == "assault" then
+                self:set_volume_factor(0.6)
+            end
+        end
+    end
 end
 
-function COSTMusicManager:stop_speek ()
-    -- TODO : Reset the volume factor to 1
+function COSTMusicManager:stop_speak ()
+    log("stop speak")
+    self:set_volume_factor(1)
 end
 
 -- Function to call when there is a loot sound

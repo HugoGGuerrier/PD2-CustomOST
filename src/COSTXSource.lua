@@ -56,13 +56,13 @@ end
 function COSTXSource:update (t, dt, paused)
     XAudio.Source.update(self, t, dt, paused)
 
-    -- Make the fade
+    -- Process the fades
     if self._fade_out_cursor then
         self._fade_out_cursor = self._fade_out_cursor + dt
 
         if self._fade_out_cursor < self._fade_out_duration then
             local fade_out_factor = (self._fade_out_duration - self._fade_out_cursor) / self._fade_out_duration
-            self:set_volume(self._fade_out_start * fade_out_factor)
+            self:set_volume((self._fade_out_start * fade_out_factor) * COSTMusicManager.volume_factor)
         else
             self._fade_out_cursor = nil
             self._fade_out_duration = nil
@@ -75,9 +75,9 @@ function COSTXSource:update (t, dt, paused)
 
             if self._fade_in_cursor < self._fade_in_duration then
                 local fade_in_factor = self._fade_in_cursor / self._fade_in_duration
-                self:set_volume(self._fade_in_target * fade_in_factor)
+                self:set_volume((self._fade_in_target * fade_in_factor) * COSTMusicManager.volume_factor)
             else
-                self:set_volume(self._fade_in_target)
+                self:set_volume(self._fade_in_target * COSTMusicManager.volume_factor)
                 self._fade_in_cursor = nil
                 self._fade_in_duration = nil
                 self._fade_in_target = nil
