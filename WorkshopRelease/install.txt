@@ -1,0 +1,7 @@
+Installation instructions :
+
+- Put the two folders "CustomOSTMod" and "CustomOSTTracks" in the "mods" folder (Not in the mod_overrides)
+
+- Put the tracks mods in the "CustomOSTTracks" directory
+
+- Enjoy the mod !
