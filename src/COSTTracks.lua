@@ -10,7 +10,7 @@ function COSTTracks:init_track (track)
     track.name = "Default track name"
     track.dir = nil
     track.fade_transition = false
-    track.fade_duration = 2
+    track.fade_duration = 1.5
     track.events_buffers = nil
     track.events_files = {
         setup = {
@@ -61,11 +61,11 @@ function COSTTracks:create_from_file (track_file, dir)
         return nil
     end
 
-    -- TODO : Verify that the track id is the only one
+    
 
     for event, sources_path in pairs(track_obj.events) do
-        new_track.events_files[event].start_source_file = track_obj.events[event].start_source
-        new_track.events_files[event].source_file = track_obj.events[event].source
+        new_track.events_files[event].start_source_file = sources_path.start_source
+        new_track.events_files[event].source_file = sources_path.source
     end
 
     if COSTTracks:load_tracks_files(new_track) then

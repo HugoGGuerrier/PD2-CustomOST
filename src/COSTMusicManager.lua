@@ -152,7 +152,6 @@ end
 -- Function to call when someone talk in the preplanning 
 function COSTMusicManager:speak_planning ()
     if COSTMusicManager.current_track then
-        log("speek planning")
         self:set_volume_factor(0.4)
     end
 end
@@ -161,25 +160,23 @@ end
 function COSTMusicManager:speak_mission ()
     if COSTMusicManager.current_track then
         if COSTMusicManager.current_event then
-            log("speak mission")
             if COSTMusicManager.current_event == "setup" then
                 self:set_volume_factor(0.35)
             end
             if COSTMusicManager.current_event == "control" then
-                self:set_volume_factor(0.43)
+                self:set_volume_factor(0.4)
             end
             if COSTMusicManager.current_event == "buildup" then
-                self:set_volume_factor(0.5)
+                self:set_volume_factor(0.45)
             end
             if COSTMusicManager.current_event == "assault" then
-                self:set_volume_factor(0.6)
+                self:set_volume_factor(0.51)
             end
         end
     end
 end
 
 function COSTMusicManager:stop_speak ()
-    log("stop speak")
     self:set_volume_factor(1)
 end
 

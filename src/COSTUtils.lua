@@ -10,6 +10,14 @@ function file:FileExists (file_to_test)
     end
 end
 
+function file:MakeDir (dir_to_create)
+    if not file.DirectoryExists(dir_to_create) then
+        if not file:FileExists(dir_to_create) then
+            os.execute("mkdir \"" .. dir_to_create .. "\"")
+        end
+    end
+end
+
 -- Print any var simply!
 function smart_print (val, indent)
     indent = indent or 0

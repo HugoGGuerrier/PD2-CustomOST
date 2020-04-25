@@ -7,8 +7,12 @@
 
     "hooks" : [
         {
+            "hook_id": "lib/setups/setup",
+            "script_path": "src/COSTCore.lua"
+        },
+        {
             "hook_id": "lib/setups/gamesetup",
-            "script_path": "Core.lua"
+            "script_path": "src/COSTHooks.lua"
         }
     ]
 }

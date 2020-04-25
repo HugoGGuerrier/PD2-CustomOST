@@ -1,41 +1,3 @@
--- Load all mod files
-local source_dir_path = ModPath .. "src/"
-
-if file.DirectoryExists( source_dir_path ) then
-    local source_files = file.GetFiles( source_dir_path )
-
-    for _, file in pairs(source_files) do
-        dofile( source_dir_path .. file )
-    end
-else
-    log("[CustomOST] [Error] : Cannot find the source directory, please reinstall this mod")
-end
-
--- Verify and start the x audio
-if not XAudio then
-    COSTLogger:log_err("You need XAudio to make this mod work")
-    return
-end
-
-blt.xaudio.setup()
-
--- Load all custom tracks
-local tracks_dir_path = "mods/CustomTracks/"
-
-if file.DirectoryExists( tracks_dir_path ) then
-    local tracks_dir = file.GetDirectories(tracks_dir_path)
-
-    for _, dir in pairs(tracks_dir) do
-
-        dir = dir .. "/"
-        local track_json_file = tracks_dir_path .. dir .. "track.json"
-        COSTTracks:create_from_file(track_json_file, tracks_dir_path .. dir)
-        
-    end
-else
-    COSTLogger:log_err("Tracks directory does not exists, please create the directory 'CustomOST/tracks/'")
-end
-
 -- Create all game hooks to make this mod works
 -- If you just want to test music loading, set this value to "false"
 local do_hooks = true
@@ -61,7 +23,7 @@ if do_hooks then
     end)
 
     Hooks:PostHook(MusicManager, "stop", "CustomOSTStop", function()
-        COSTMusicManager:stop_custom(false)
+        COSTMusicManager:stop_custom(false, 1)
     end)
 
     Hooks:PostHook(MusicManager, "post_event", "CustomOSTPostEvent", function(_, name)
@@ -93,7 +55,6 @@ if do_hooks then
         COSTMusicManager:stop_speak()
     end)
 
-end
+    COSTLogger:dev_log("Hooks loaded !")
 
--- Tell the developer if the core ended with success
-COSTLogger:dev_log("Core ended correctly")
+end
