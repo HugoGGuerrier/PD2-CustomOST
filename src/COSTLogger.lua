@@ -1,4 +1,4 @@
-COSTLogger = {}
+COSTLogger = COSTLogger or {}
 
 COSTLogger.dev = true
 

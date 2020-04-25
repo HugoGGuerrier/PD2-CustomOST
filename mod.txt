@@ -4,7 +4,8 @@
     "author": "Hugo Guerrier",
     "contact": "hugogguerrier@gmail.com",
     "version": "0.6a",
-    "image" : "res/logo/logo_256.png",
+    "image" : "res/logo_256.png",
+
     "hooks" : [
         {
             "hook_id": "lib/setups/setup",
@@ -13,6 +14,17 @@
         {
             "hook_id": "lib/setups/gamesetup",
             "script_path": "src/COSTHooks.lua"
+        }
+    ],
+
+    "updates" : [
+        {
+            "identifier" : "customostmodbynate",
+            "host": {
+                "meta": "https://example.com/my_meta.json",
+                "download": "https://example.com/download.zip",
+                "patchnotes": "https://example.com/patchnotes.html"
+            }
         }
     ]
 }

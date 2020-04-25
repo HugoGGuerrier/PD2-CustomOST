@@ -1,4 +1,4 @@
-COSTTracks = {}
+COSTTracks = COSTTracks or {}
 
 COSTTracks.custom_tracks_map = {}
 COSTTracks.custom_tracks_ordered = {}
@@ -54,6 +54,7 @@ function COSTTracks:create_from_file (track_file, dir)
     new_track.id = track_obj.id
     new_track.volume = track_obj.volume or 1
     new_track.fade_transition = track_obj.fade_transition or false
+    new_track.fade_duration = track_obj.fade_duration or 1.5
     new_track.dir = dir
     
     if not new_track.id or not new_track.name then

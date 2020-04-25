@@ -1,4 +1,4 @@
-COSTBuffer = {}
+COSTBuffer = COSTBuffer or {}
 
 -- Create a custom buffer with the needed informations
 function COSTBuffer:create_buffer (cost_track, event, play_start)

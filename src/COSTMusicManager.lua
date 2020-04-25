@@ -1,4 +1,4 @@
-COSTMusicManager = {}
+COSTMusicManager = COSTMusicManager or {}
 
 COSTMusicManager.current_track = nil
 COSTMusicManager.current_event = nil
@@ -86,6 +86,7 @@ function COSTMusicManager:post_event (event)
                 local fade_duration = COSTTracks.custom_tracks_map[COSTMusicManager.current_track].fade_duration
 
                 COSTLogger:dev_log(trad_event .. " posted !")
+                smart_print(fade_duration)
 
                 COSTMusicManager:stop_custom(is_track_fade, fade_duration)
                 COSTMusicManager:play_custom(true, is_track_fade, fade_duration)
