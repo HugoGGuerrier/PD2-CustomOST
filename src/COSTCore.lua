@@ -22,7 +22,7 @@ end
 blt.xaudio.setup()
 
 -- Load all custom tracks
-local tracks_dir_path = "mods/CustomTracks/"
+local tracks_dir_path = "mods/CustomOSTTracks/"
 
 if file.DirectoryExists(tracks_dir_path) then
     local tracks_dir = file.GetDirectories(tracks_dir_path)

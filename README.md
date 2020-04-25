@@ -23,4 +23,11 @@ This mod is designed to be lightweight and simple to use.
 * Smoother music integration
 * Just add a music from one file
 
-/!\ THIS IS AN ALPHA VERSION, THIS MOD MAY NOT WORK AND CAUSE GAME CRASHS /!\
+### Intallation :
+
+* Unzip the mod folder, it will produce 2 directory : "CustomOSTMod" and "CustomOSTTracks"
+* Move those directory to the "mods" SuperBLT directory __ /!\ NOT IN MOD_OVERRIDES /!\ __
+* Just put the tracks folders in the "CustomOSTTracks" directory
+* Enjoy it !
+
+__ /!\ THIS IS AN ALPHA VERSION, THIS MOD MAY NOT WORK AND CAUSE GAME CRASHS /!\ __
