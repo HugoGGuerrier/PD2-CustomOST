@@ -30,8 +30,14 @@ if file.DirectoryExists(tracks_dir_path) then
     for _, dir in pairs(tracks_dir) do
 
         dir = dir .. "/"
-        local track_json_file = tracks_dir_path .. dir .. "track.json"
-        COSTTracks:create_from_file(track_json_file, tracks_dir_path .. dir)
+
+        -- Get the json OR THE FALSE TXT JSON FILE
+        local track_json_file = tracks_dir_path .. dir .. "track.txt"
+        if file:FileExists(tracks_dir_path .. dir .. "track.json") then
+            track_json_file = tracks_dir_path .. dir .. "track.json"
+        end
+
+        COSTTracks:create_from_json_file(track_json_file, tracks_dir_path .. dir)
         
     end
 else

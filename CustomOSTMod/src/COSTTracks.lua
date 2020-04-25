@@ -33,11 +33,7 @@ function COSTTracks:init_track (track)
 end
 
 -- Create a new track from a json file and the directory of this file
-function COSTTracks:create_from_file (track_file, dir)
-    -- Init the result
-    local new_track = {}
-    COSTTracks:init_track(new_track)
-
+function COSTTracks:create_from_json_file (track_file, dir)
     -- Check the track file existence
     if not file:FileExists(track_file) then
         COSTLogger:log_err("Cannot load track from folder " .. dir .. " track.json file is missing")
@@ -50,23 +46,36 @@ function COSTTracks:create_from_file (track_file, dir)
     local track_obj = json.decode(track_json)
     f:close()
 
+    -- Create the track
+    COSTTracks:create_track(track_obj, dir)
+end
+
+-- Function to create the new track with a track obj
+function COSTTracks:create_track (track_obj, dir)
+    -- Init the result
+    local new_track = {}
+    COSTTracks:init_track(new_track)
+
     new_track.name = track_obj.name
     new_track.id = track_obj.id
     new_track.volume = track_obj.volume or 1
     new_track.fade_transition = track_obj.fade_transition or false
     new_track.fade_duration = track_obj.fade_duration or 1.5
     new_track.dir = dir
-    
+
     if not new_track.id or not new_track.name then
-        COSTLogger:log_err("Cannot load track from folder " .. dir .. " track.json file is malformed, you need at leat a 'name' and an 'id'")
+        COSTLogger:log_err("Cannot load track from folder " .. dir .. "track.json file is malformed, you need at leat a 'name' and an 'id'")
         return nil
     end
 
-    
+    if COSTTracks.custom_tracks_map[new_track.id] then
+        COSTLogger:log_err("Cannot load the track " .. new_track.name .. " multiple id violation")
+        return nil
+    end
 
     for event, sources_path in pairs(track_obj.events) do
-        new_track.events_files[event].start_source_file = sources_path.start_source
-        new_track.events_files[event].source_file = sources_path.source
+        new_track.events_files[event].start_source_file = sources_path.start_file
+        new_track.events_files[event].source_file = sources_path.file
     end
 
     if COSTTracks:load_tracks_files(new_track) then
