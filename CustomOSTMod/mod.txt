@@ -22,8 +22,8 @@
             "identifier" : "customostmodbynate",
             "host": {
                 "meta": "https://github.com/HugoGGuerrier/PD2-CustomOST/raw/master/meta.json",
-                "download": "https://example.com/download.zip",
-                "patchnotes": "https://example.com/patchnotes.html"
+                "download": "https://github.com/HugoGGuerrier/PD2-CustomOST/raw/master/release.zip",
+                "patchnotes": "https://github.com/HugoGGuerrier/PD2-CustomOST/raw/master/patchnotes.html"
             }
         }
     ]
