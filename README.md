@@ -21,5 +21,6 @@ This mod is designed to be lightweight and simple to use.
 * Compatibility with Beardlib music mods
 * Complete music integration
 * Smoother music integration
+* Just add a music from one file
 
 /!\ THIS IS AN ALPHA VERSION, THIS MOD MAY NOT WORK AND CAUSE GAME CRASHS /!\
