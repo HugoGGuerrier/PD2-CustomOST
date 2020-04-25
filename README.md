@@ -26,8 +26,8 @@ This mod is designed to be lightweight and simple to use.
 ### Intallation :
 
 * Unzip the mod folder, it will produce 2 directory : "CustomOSTMod" and "CustomOSTTracks"
-* Move those directory to the "mods" SuperBLT directory __ /!\ NOT IN MOD_OVERRIDES /!\ __
+* Move those directory to the "mods" SuperBLT directory **/!\ NOT IN MOD_OVERRIDES /!\\**
 * Just put the tracks folders in the "CustomOSTTracks" directory
 * Enjoy it !
 
-__ /!\ THIS IS AN ALPHA VERSION, THIS MOD MAY NOT WORK AND CAUSE GAME CRASHS /!\ __
+**/!\ THIS IS AN ALPHA VERSION, THIS MOD MAY NOT WORK AND CAUSE GAME CRASHS /!\\**
