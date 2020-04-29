@@ -55,6 +55,38 @@ if do_hooks then
         COSTMusicManager:stop_speak()
     end)
 
+    Hooks:PostHook(IngameBleedOutState, "at_enter", "CustomOSTBleedoutEnter", function ()
+        COSTMusicManager:bleedout_enter()
+    end)
+
+    Hooks:PostHook(IngameStandardState, "at_enter", "CustomOSTStandardEnter", function ()
+        COSTMusicManager:standard_enter()
+    end)
+
+    Hooks:PostHook(IngameWaitingForRespawnState, "at_enter", "CustomOSTArrestedEnter", function ()
+        COSTMusicManager:standard_enter()
+    end)
+
+    Hooks:PostHook(HUDManager, "show_hint", "CustomOSTHintFeedbakcSoundSound", function (_, params)
+        if params.event then
+            if params.event == "stinger_feedback_positive" then
+                COSTMusicManager:feedback_sound()
+            end
+        end
+    end)
+
+    Hooks:PostHook(HUDManager, "on_hit_direction", "CustomOSTHitSound", function ()
+        COSTMusicManager:hit_sound()
+    end)
+
+    Hooks:PostHook(HUDPresenter, "_present_information", "TESTTES", function (_, params)
+        if params.event then
+            if params.event == "stinger_objectivecomplete" then
+                COSTMusicManager:objective_sound()
+            end
+        end
+    end)
+
     COSTLogger:dev_log("Hooks loaded !")
 
 end
