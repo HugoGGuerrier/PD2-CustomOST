@@ -79,7 +79,7 @@ if do_hooks then
         COSTMusicManager:hit_sound()
     end)
 
-    Hooks:PostHook(HUDPresenter, "_present_information", "TESTTES", function (_, params)
+    Hooks:PostHook(HUDPresenter, "_present_information", "CustomOSTPresenterSound", function (_, params)
         if params.event then
             if params.event == "stinger_objectivecomplete" then
                 COSTMusicManager:objective_sound()

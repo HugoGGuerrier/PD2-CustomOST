@@ -1,4 +1,4 @@
-# Custom OST 0.7a
+# Custom OST 0.8a
 
 This is a Payday 2 mod to add the tracks you want to heist, but in a different way that BeardLib.
 This mod is designed to be lightweight and simple to use.
@@ -16,10 +16,11 @@ This mod is designed to be lightweight and simple to use.
 * Dynamic music integration (i.e. when bain talks, the music volume gets low)
 * Smooth music integration
 * Optimized track loading
+* Compatibility with Beardlib music mod (only ogg files)
 
 ### Upcomming features :
 
-* Compatibility with Beardlib music mods
+* Compatibility with Beardlib music mods (.movie)
 * Complete music integration
 * Just add a music from one file
 * Optimize track playing

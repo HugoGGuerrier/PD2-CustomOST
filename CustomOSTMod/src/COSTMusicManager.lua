@@ -41,7 +41,7 @@ COSTMusicManager.volume_decline = {
 
 -- Function to handle the music preview in the loadout menu
 function COSTMusicManager:track_listen_start (event, track)
-    -- Only if track exists, else do nothing
+    -- Only if track exists
     if track then
 
         -- Test if the track is a custom track
@@ -72,6 +72,20 @@ function COSTMusicManager:track_listen_start (event, track)
             -- Stop the custom music
             COSTLogger:dev_log("Other track listen start !")
             COSTMusicManager:stop_custom(false, 1)
+        end
+
+    else
+
+        if event and event == "stop_all_music" then
+            if COSTMusicManager.current_track then
+                -- Remove the current state
+                COSTMusicManager.current_event = nil
+                COSTMusicManager.current_track = nil
+
+                -- Stop the custom music
+                COSTLogger:dev_log("Other choice in the ost menu !")
+                COSTMusicManager:stop_custom(false, 1)
+            end
         end
 
     end

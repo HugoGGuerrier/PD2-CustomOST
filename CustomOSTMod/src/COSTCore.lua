@@ -32,12 +32,24 @@ if file.DirectoryExists(tracks_dir_path) then
         dir = dir .. "/"
 
         -- Get the json OR THE FALSE TXT JSON FILE
-        local track_json_file = tracks_dir_path .. dir .. "track.txt"
+        local track_json_file = nil
+        local track_xml_file = nil
+        if file:FileExists(tracks_dir_path .. dir .. "track.txt") then
+            track_json_file = tracks_dir_path .. dir .. "track.txt"
+        end
         if file:FileExists(tracks_dir_path .. dir .. "track.json") then
             track_json_file = tracks_dir_path .. dir .. "track.json"
         end
+        if file:FileExists(tracks_dir_path .. dir .. "main.xml") then
+            track_xml_file = tracks_dir_path .. dir .. "main.xml"
+        end
 
-        COSTTracks:create_from_json_file(track_json_file, tracks_dir_path .. dir)
+        if track_json_file then
+            COSTTracks:create_from_json_file(track_json_file, tracks_dir_path .. dir)
+        end
+        if track_xml_file then
+            COSTTracks:create_from_xml_file(track_xml_file, tracks_dir_path .. dir)
+        end
         
     end
 else
