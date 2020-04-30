@@ -105,7 +105,7 @@ function COSTMusicManager:post_event (event)
     -- Verify the current track selection
     local current_track = COSTMusicManager.current_track or Global.music_manager.loadout_selection
     if COSTTracks.custom_tracks_map[current_track] then
-        -- Update the curren track
+        -- Update the current track
         if current_track ~= COSTMusicManager.current_track then
             COSTMusicManager.current_track = current_track
         end
@@ -125,7 +125,7 @@ function COSTMusicManager:post_event (event)
                 COSTMusicManager:play_custom(true, is_track_fade, fade_duration)
             end
         else
-            if event == "resultscreen_win" or event == "resultscreen_lose" then
+            if event == "resultscreen_win" or event == "resultscreen_lose" or event == "menu_music" then
                 if COSTMusicManager.current_track then
                     COSTMusicManager:stop_custom(true, 1)
                 end
@@ -237,7 +237,7 @@ end
 -- Function to call when there is a feedback sound (gage, loot, small loot...)
 function COSTMusicManager:feedback_sound ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.timeouts.feedback.timer = 2.5
+        COSTMusicManager.timeouts.feedback.timer = 2.2
         COSTMusicManager.volume_alterators.feedback = 0.75
     end
 end
@@ -245,7 +245,7 @@ end
 -- Function to call when the player recieve a new objective
 function COSTMusicManager:objective_sound ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.timeouts.feedback.timer = 3
+        COSTMusicManager.timeouts.feedback.timer = 2.6
         COSTMusicManager.volume_alterators.feedback = 0.75
     end
 end

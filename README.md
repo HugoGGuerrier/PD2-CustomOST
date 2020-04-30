@@ -1,4 +1,4 @@
-# Custom OST 0.8a
+# Custom OST 0.9a
 
 This is a Payday 2 mod to add the tracks you want to heist, but in a different way that BeardLib.
 This mod is designed to be lightweight and simple to use.

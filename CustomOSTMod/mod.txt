@@ -3,7 +3,7 @@
     "description": "A light mod to add custom heist music with dynamic integration.",
     "author": "Hugo Guerrier",
     "contact": "hugogguerrier@gmail.com",
-    "version": "0.8a",
+    "version": "0.9a",
     "image" : "res/logo_256.png",
 
     "hooks" : [
@@ -13,7 +13,7 @@
         },
         {
             "hook_id": "lib/setups/gamesetup",
-            "script_path": "src/COSTHooks.lua"
+            "script_path": "src/COSTLateHooks.lua"
         }
     ],
 
@@ -23,7 +23,7 @@
             "host": {
                 "meta": "https://github.com/HugoGGuerrier/PD2-CustomOST/raw/master/meta.json",
                 "download": "https://github.com/HugoGGuerrier/PD2-CustomOST/raw/master/release.zip",
-                "patchnotes": "https://github.com/HugoGGuerrier/PD2-CustomOST/raw/master/patchnotes.html"
+                "patchnotes": "https://github.com/HugoGGuerrier/PD2-CustomOST/raw/master/changelog.txt"
             }
         }
     ]

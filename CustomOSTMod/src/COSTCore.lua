@@ -5,7 +5,7 @@ if file.DirectoryExists(source_dir_path) then
     local source_files = file.GetFiles(source_dir_path)
 
     for _, file in pairs(source_files) do
-        if file ~= "COSTCore.lua" and file ~= "COSTHooks.lua" then
+        if file ~= "COSTCore.lua" and file ~= "COSTLateHooks.lua" then
             dofile(source_dir_path .. file)
         end
     end
@@ -55,6 +55,39 @@ if file.DirectoryExists(tracks_dir_path) then
 else
     COSTLogger:dev_log("Tracks directory was not found and created")
     file:MakeDir(tracks_dir_path)
+end
+
+-- If you want to load the hooks in the game menu (essential for the mod working)
+local do_hook = true
+
+if do_hook then
+
+    -- Create the hook to insert the custom tracks in the jukebox menu and the playlist menu
+    Hooks:Add("LocalizationManagerPostInit", "CustomOSTTracksLocalization", function()
+        COSTTracks:load_tracks_loc()
+    end)
+
+    Hooks:PostHook(MusicManager, "init", "CustomOSTTracksTweak", function()
+        COSTTracks:add_tracks_tweak()
+    end)
+
+    -- Create hooks to make the custom music play
+    Hooks:PostHook(MusicManager, "track_listen_start", "CustomOSTTrackListerStart", function(_, event, track)
+        COSTMusicManager:track_listen_start(event, track)
+    end)
+
+    Hooks:PostHook(MusicManager, "track_listen_stop", "CustomOSTTrackListenStop", function()
+        COSTMusicManager:track_listen_stop()
+    end)
+
+    Hooks:PostHook(MusicManager, "stop", "CustomOSTStop", function()
+        COSTMusicManager:stop_custom(false, 1)
+    end)
+
+    Hooks:PostHook(MusicManager, "post_event", "CustomOSTPostEvent", function(_, name)
+        COSTMusicManager:post_event(name)
+    end)
+
 end
 
 -- Tell the developer if the core ended with success

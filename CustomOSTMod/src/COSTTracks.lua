@@ -20,6 +20,12 @@ function COSTTracks:init_track (track)
     track.is_ogg = true
     track.fade_duration = 1
     track.events_buffers = nil
+    track.events_volumes = {
+        setup = 1,
+        control = 1,
+        buildup = 1,
+        assault = 1
+    }
     track.events_files = {
         setup = {
             start_source_file = nil,
@@ -137,6 +143,7 @@ function COSTTracks:create_track (track_obj, dir)
     local new_track = {}
     COSTTracks:init_track(new_track)
 
+    -- Get the track main params
     new_track.name = track_obj.name
     new_track.id = track_obj.id
     new_track.volume = track_obj.volume or 1
@@ -155,17 +162,22 @@ function COSTTracks:create_track (track_obj, dir)
         return nil
     end
 
-    for event, sources_path in pairs(track_obj.events) do
-        new_track.events_files[event].start_source_file = sources_path.start_file
-        new_track.events_files[event].source_file = sources_path.file
+    -- Load the evens params
+    for event, params in pairs(track_obj.events) do
+        new_track.events_files[event].start_source_file = params.start_file
+        new_track.events_files[event].source_file = params.file
+        new_track.events_volumes[event] = params.volume or 1
     end
 
+    -- Load all the track buffers
     if new_track.is_ogg then
+
         if COSTTracks:load_tracks_ogg_files(new_track) then
             COSTLogger:dev_log(new_track.name .. " loaded !")
             COSTTracks.custom_tracks_map[new_track.id] = new_track
             table.insert(COSTTracks.custom_tracks_ordered, new_track)
         end
+
     else
         COSTLogger:dev_log("TODO : Make the compatibility with the .movie files")
     end
@@ -202,7 +214,7 @@ function COSTTracks:load_tracks_ogg_files (track)
         if start_source_path then
             if file:FileExists(start_source_path) then 
                 events_buffers_tmp[event].start_source_buffer = XAudio.Buffer:new(start_source_path)
-                COSTLogger:dev_log("Load " .. track.id .. " - " .. event .. "(start)")
+                COSTLogger:dev_log("Load " .. track.id .. " - " .. event .. " (start)")
             else
                 COSTLogger:log_warn("File " .. start_source_path .. " is missing or unreadable")
             end
@@ -248,7 +260,7 @@ function COSTTracks:add_tracks_tweak()
     for _, track in pairs(COSTTracks.custom_tracks_ordered) do
         if track.cost_type == "CustomOSTTrack" then
             table.insert(tweak_data.music.track_list, {track = track.id})
-            COSTLogger:dev_log("Track tweaks loaded !")
         end
     end
+    COSTLogger:dev_log("Tracks tweaks loaded !")
 end

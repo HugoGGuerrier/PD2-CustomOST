@@ -1,0 +1,19 @@
+Custom OST Changelog
+
+0.9a :
+
+- Add the event separate volume
+- Correct the bug that disable the track in options
+- Correct some minor bug
+- Optimize code
+
+0.8a :
+
+- Now support Beardlib Music mods with OGG files (Don't support with .movie files for now)
+- Correct some minor bugs
+
+0.7a :
+
+- Initial release
+- All basic features (Track loading and playing, event posting...)
+- Partial music dynamic volume

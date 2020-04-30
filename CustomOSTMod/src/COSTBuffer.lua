@@ -6,7 +6,7 @@ function COSTBuffer:create_buffer (cost_track, event, play_start)
     res.cost_type = "CustomOSTBuffer"
     res.event = event
     res.track = cost_track.id
-    res.volume = cost_track.volume
+    res.volume = cost_track.volume * cost_track.events_volumes[event]
     if play_start and cost_track.events_buffers[event].start_source_buffer then
         res.buffer = cost_track.events_buffers[event].start_source_buffer
         res.is_looping = false
