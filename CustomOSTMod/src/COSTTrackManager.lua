@@ -78,7 +78,7 @@ end
 -- Create a new track from a json file and the directory of this file
 function COSTTrackManager:create_from_json_file (track_file, dir)
     -- Check the track file existence
-    if not file:FileExists(track_file) then
+    if not file.FileExists(track_file) then
         COSTLogger:log_err("Cannot load track from folder " .. dir .. " track file is missing")
         return nil
     end
@@ -86,7 +86,12 @@ function COSTTrackManager:create_from_json_file (track_file, dir)
     -- Load the track config
     local f = io.open(track_file, "r")
     local track_json = f:read("*all")
-    local track_obj = json.decode(track_json)
+    local valid, track_obj = pcall(function () return json.decode(track_json) end)
+    if not valid then
+        COSTLogger:log_err(dir .. track_file .. " JSON file is malformed")
+        return nil
+    end
+    track_obj.is_ogg = true
     f:close()
 
     -- Create the track
@@ -97,7 +102,7 @@ end
 -- Create a new track from an xml Beardlib file
 function COSTTrackManager:create_from_xml_file (track_file, dir)
     -- Check the track file existence
-    if not file:FileExists(track_file) then
+    if not file.FileExists(track_file) then
         COSTLogger:log_err("Cannot load track from folder " .. dir .. " main.xml file is missing")
         return nil
     end
@@ -117,6 +122,7 @@ function COSTTrackManager:create_from_xml_file (track_file, dir)
 
         track_obj.id = track_tmp_obj.HeistMusic.id
         track_obj.volume = track_tmp_obj.HeistMusic.volume or 1
+        track_obj.is_ogg = true
         track_obj.events = {
             setup = {},
             control = {},
@@ -129,31 +135,36 @@ function COSTTrackManager:create_from_xml_file (track_file, dir)
             if type(k) == "number" and type(v) == "table" then
                 if v._meta and v._meta == "event" then
                     local event_name = COSTTrackManager.beard_lib_event_trad[v.name]
-                    track_obj.events[event_name].file = v.source
-                    track_obj.events[event_name].start_file = v.start_source
+                    if event_name then
+                        track_obj.events[event_name].start_file = v.start_source
+                        track_obj.events[event_name].file = v.source
+                    end
                 end
             end
         end
 
     else
-        COSTLogger:log_err("Cannot load Beardlib mods without ogg files, not yet supported")
-        return nil
-    end
-
-    -- Verify the track object
-    if not track_obj.id then
-        COSTLogger:log_err("Cannot find the track id, every track require an id")
+        COSTLogger:log_err("Cannot load Beardlib mods without ogg files, not supported yet")
         return nil
     end
 
     -- Get the localization info
     if track_tmp_obj.Localization then
 
-        local loc_file = dir .. track_tmp_obj.Localization.directory .. "/" .. track_tmp_obj.Localization.default
+        local loc_file = nil
+        if track_tmp_obj.Localization.directory then
+            loc_file = dir .. track_tmp_obj.Localization.directory .. "/" .. track_tmp_obj.Localization.default
+        else
+            loc_file = dir .. track_tmp_obj.Localization.default
+        end
 
-        if file:FileExists(loc_file) then
+        if loc_file and file.FileExists(loc_file) then
             local f_loc = io.open(loc_file, "r")
-            local loc_obj = json.decode(f_loc:read("*all"))
+            local valid, loc_obj = pcall(function () return json.decode(f_loc:read("*all")) end)
+            if not valid then
+                COSTLogger:log_err(loc_file .. " JSON file is malformed")
+                return nil
+            end
             track_obj.name = loc_obj["menu_jukebox_" .. track_obj.id]
         else
             COSTLogger:log_err("Cannot find the localization file")
@@ -172,6 +183,12 @@ end
 
 -- Create a simple track from an OGG file
 function COSTTrackManager:create_simple_track (track_file, dir)
+    -- Check the track file existence
+    if not file.FileExists(dir .. track_file) then
+        COSTLogger:log_err("Track file " .. track_file .. " is missing")
+        return nil
+    end
+
     -- Init the result
     local new_track = {}
     COSTTrackManager:init_simple_track(new_track)
@@ -307,7 +324,7 @@ function COSTTrackManager:load_track_ogg_files (track)
 
             -- Load the start source file in a buffer if it exists
             if start_source_path then
-                if file:FileExists(start_source_path) then 
+                if file.FileExists(start_source_path) then 
                     events_buffers_tmp[event].start_source_buffer = XAudio.Buffer:new(start_source_path)
                     COSTLogger:dev_log("Load " .. track.id .. " - " .. event .. " (start)")
                 else
@@ -317,7 +334,7 @@ function COSTTrackManager:load_track_ogg_files (track)
 
             -- Try to load the main source file in a buffer
             if source_path then
-                if file:FileExists(source_path) then
+                if file.FileExists(source_path) then
                     events_buffers_tmp[event].source_buffer = XAudio.Buffer:new(source_path)
                     COSTLogger:dev_log("Load " .. track.id .. " - " .. event)
                 else
@@ -351,7 +368,7 @@ function COSTTrackManager:load_tracks_loc ()
             content[menu_jukebox_screen_id] = track.name
         end
     end
-    LocalizationManager:add_localized_strings(content, true)
+    LocalizationManager:add_localized_strings(content, false)
     COSTLogger:dev_log("Tracks localization loaded !")
 end
 
@@ -360,7 +377,11 @@ end
 function COSTTrackManager:add_tracks_tweak()
     for _, track in pairs(COSTTrackManager.custom_tracks_ordered) do
         if track.cost_type == "CustomOSTTrack" or track.cost_type == "CustomOSTSimpleTrack" then
-            table.insert(tweak_data.music.track_list, {track = track.id})
+            if not tweak_data.music.track_list[track.id] then
+                table.insert(tweak_data.music.track_list, {track = track.id})
+            else
+                COSTLogger:log_err("Duplicate track id in the game track list")
+            end
         end
     end
     COSTLogger:dev_log("Tracks tweaks loaded !")

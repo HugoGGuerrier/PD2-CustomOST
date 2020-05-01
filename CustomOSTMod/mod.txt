@@ -4,7 +4,7 @@
     "author": "Hugo Guerrier",
     "contact": "hugogguerrier@gmail.com",
     "version": "0.11a",
-    "priority" : 500,
+    "priority" : 900,
     "image" : "res/logo_256.png",
 
     "hooks" : [

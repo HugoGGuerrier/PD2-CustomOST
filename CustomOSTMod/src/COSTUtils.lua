@@ -1,5 +1,5 @@
 -- Add the function FileExists to the blt file class
-function file:FileExists (file_to_test)
+function file.FileExists (file_to_test)
     local f = io.open(file_to_test, "r")
 
     if f~=nil then 
@@ -12,9 +12,9 @@ end
 
 
 -- Create a directory
-function file:MakeDir (dir_to_create)
+function file.MakeDir (dir_to_create)
     if not file.DirectoryExists(dir_to_create) then
-        if not file:FileExists(dir_to_create) then
+        if not file.FileExists(dir_to_create) then
             os.execute("mkdir \"" .. dir_to_create .. "\"")
         end
     end

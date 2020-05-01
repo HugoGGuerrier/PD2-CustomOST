@@ -13,10 +13,10 @@ else
     log("[CustomOST] [Error] : Cannot find the source directory, please reinstall this mod")
 end
 
--- Verify and start the x audio
+-- Verify and start the x audio API
 if not XAudio then
     COSTLogger:log_err("You need XAudio to make this mod work")
-    return
+    return nil
 end
 
 blt.xaudio.setup()
@@ -26,7 +26,6 @@ local tracks_dir_path = "mods/CustomOSTTracks/"
 
 if file.DirectoryExists(tracks_dir_path) then
     local tracks_dir = file.GetDirectories(tracks_dir_path)
-    local tracks_files = file.GetFiles(tracks_dir_path)
 
     -- Load all the track folders
     for _, dir in pairs(tracks_dir) do
@@ -36,24 +35,25 @@ if file.DirectoryExists(tracks_dir_path) then
         -- Get the json OR THE FALSE TXT JSON FILE
         local track_json_file = nil
         local track_xml_file = nil
-        if file:FileExists(tracks_dir_path .. dir .. "track.txt") then
+        if file.FileExists(tracks_dir_path .. dir .. "track.txt") then
             track_json_file = tracks_dir_path .. dir .. "track.txt"
         end
-        if file:FileExists(tracks_dir_path .. dir .. "track.json") then
+        if file.FileExists(tracks_dir_path .. dir .. "track.json") then
             track_json_file = tracks_dir_path .. dir .. "track.json"
         end
-        if file:FileExists(tracks_dir_path .. dir .. "main.xml") then
+        if file.FileExists(tracks_dir_path .. dir .. "main.xml") then
             track_xml_file = tracks_dir_path .. dir .. "main.xml"
         end
 
         if track_json_file then
             COSTTrackManager:create_from_json_file(track_json_file, tracks_dir_path .. dir)
-        end
-        if track_xml_file then
+        elseif track_xml_file then
             COSTTrackManager:create_from_xml_file(track_xml_file, tracks_dir_path .. dir)
         end
         
     end
+
+    local tracks_files = file.GetFiles(tracks_dir_path)
 
     -- Load all the simple music files
     for _, file in pairs(tracks_files) do
@@ -65,7 +65,7 @@ if file.DirectoryExists(tracks_dir_path) then
     end
 else
     COSTLogger:dev_log("Tracks directory was not found... The mod has created one")
-    file:MakeDir(tracks_dir_path)
+    file.MakeDir(tracks_dir_path)
 end
 
 -- If you want to load the hooks in the game menu (essential for the mod working)

@@ -8,6 +8,7 @@ Custom OST Changelog
 * Remove the "fade_transition" setting which is useless now
 * Correct the default heist track selection bug
 * Correct the FUC**** manual
+* Make the code more robust
 * Optimize the code a LOT
 
 ### 0.10a
