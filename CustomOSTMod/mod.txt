@@ -3,7 +3,8 @@
     "description": "A light mod to add custom heist music with dynamic integration.",
     "author": "Hugo Guerrier",
     "contact": "hugogguerrier@gmail.com",
-    "version": "0.10a",
+    "version": "0.11a",
+    "priority" : 500,
     "image" : "res/logo_256.png",
 
     "hooks" : [

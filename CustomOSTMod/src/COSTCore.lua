@@ -26,7 +26,9 @@ local tracks_dir_path = "mods/CustomOSTTracks/"
 
 if file.DirectoryExists(tracks_dir_path) then
     local tracks_dir = file.GetDirectories(tracks_dir_path)
+    local tracks_files = file.GetFiles(tracks_dir_path)
 
+    -- Load all the track folders
     for _, dir in pairs(tracks_dir) do
 
         dir = dir .. "/"
@@ -45,15 +47,24 @@ if file.DirectoryExists(tracks_dir_path) then
         end
 
         if track_json_file then
-            COSTTracks:create_from_json_file(track_json_file, tracks_dir_path .. dir)
+            COSTTrackManager:create_from_json_file(track_json_file, tracks_dir_path .. dir)
         end
         if track_xml_file then
-            COSTTracks:create_from_xml_file(track_xml_file, tracks_dir_path .. dir)
+            COSTTrackManager:create_from_xml_file(track_xml_file, tracks_dir_path .. dir)
         end
         
     end
+
+    -- Load all the simple music files
+    for _, file in pairs(tracks_files) do
+        local splited_file_name = split_string(file, ".")
+        local file_extension = splited_file_name[#splited_file_name]
+        if file_extension == "ogg" or file_extension == "OGG" then
+            COSTTrackManager:create_simple_track(file, tracks_dir_path)
+        end
+    end
 else
-    COSTLogger:dev_log("Tracks directory was not found and created")
+    COSTLogger:dev_log("Tracks directory was not found... The mod has created one")
     file:MakeDir(tracks_dir_path)
 end
 
@@ -64,11 +75,11 @@ if do_hook then
 
     -- Create the hook to insert the custom tracks in the jukebox menu and the playlist menu
     Hooks:Add("LocalizationManagerPostInit", "CustomOSTTracksLocalization", function()
-        COSTTracks:load_tracks_loc()
+        COSTTrackManager:load_tracks_loc()
     end)
 
     Hooks:PostHook(MusicManager, "init", "CustomOSTTracksTweak", function()
-        COSTTracks:add_tracks_tweak()
+        COSTTrackManager:add_tracks_tweak()
     end)
 
     -- Create hooks to make the custom music play

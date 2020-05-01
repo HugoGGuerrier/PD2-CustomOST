@@ -10,6 +10,7 @@ COSTMusicManager.events_table = {
     music_heist_anticipation = "buildup",
     music_heist_assault = "assault"
 }
+
 COSTMusicManager.events_rtable = {
     setup = "music_heist_setup",
     control = "music_heist_control",
@@ -20,29 +21,17 @@ COSTMusicManager.events_rtable = {
 COSTMusicManager.volume_alterators = {
     hit = 0,
     feedback = 0,
-    speak = 0
+    speak = 0,
+    event = 0
 }
 
-COSTMusicManager.timeouts = {
-    hit = {
-        timer = nil,
-        clbk = function () COSTMusicManager.volume_alterators.hit = 0 end
-    },
-    feedback = {
-        timer = nil,
-        clbk = function () COSTMusicManager.volume_alterators.feedback = 0 end
-    }
+COSTMusicManager.timers = {
+    hit = nil,
+    feedback = nil,
+    bleedout = nil,
+    flashbang = nil
 }
 
-COSTMusicManager.bleedout_volume_alterator = {
-    duration = nil,
-    cursor = nil
-}
-
-COSTMusicManager.flash_volume_alterator = {
-    duration = nil,
-    cursor = nil
-}
 
 -- Function to handle the music preview in the loadout menu
 function COSTMusicManager:track_listen_start (event, track)
@@ -50,7 +39,7 @@ function COSTMusicManager:track_listen_start (event, track)
     if track then
 
         -- Test if the track is a custom track
-        local custom_track = COSTTracks.custom_tracks_map[track]
+        local custom_track = COSTTrackManager.custom_tracks_map[track]
         local trad_event = COSTMusicManager.events_table[event]
 
         if custom_track and trad_event then
@@ -79,37 +68,41 @@ function COSTMusicManager:track_listen_start (event, track)
             COSTMusicManager:stop_custom(false, 1)
         end
 
-    else
-
-        if event and event == "stop_all_music" then
-            if COSTMusicManager.current_track then
-                -- Remove the current state
-                COSTMusicManager.current_event = nil
-                COSTMusicManager.current_track = nil
-
-                -- Stop the custom music
-                COSTLogger:dev_log("Other choice in the ost menu !")
-                COSTMusicManager:stop_custom(false, 1)
-            end
-        end
-
     end
+
+    -- Handle music stopping in the menu
+    if event and event == "stop_all_music" then
+        if COSTMusicManager.current_track then
+            -- Remove the current state
+            COSTMusicManager.current_event = nil
+            COSTMusicManager.current_track = nil
+
+            -- Stop the custom music
+            COSTLogger:dev_log("Other choice in the ost menu !")
+            COSTMusicManager:stop_custom(false, 1)
+        end
+    end
+
 end
+
 
 -- Function to handle stop music preview in the loadout menu
 function COSTMusicManager:track_listen_stop ()
-    if COSTTracks.custom_tracks_map[Global.music_manager.loadout_selection] then
+    if COSTMusicManager.current_track then
         COSTMusicManager.current_event = nil
         COSTLogger:dev_log("Track listen stop !")
         COSTMusicManager:stop_custom(true, 1)
     end
 end
 
+
 -- Fuction to handle event changing in the heist
 function COSTMusicManager:post_event (event)
-    -- Verify the current track selection
+    -- Get the current track even without excplicit selection
     local current_track = COSTMusicManager.current_track or Global.music_manager.loadout_selection
-    if COSTTracks.custom_tracks_map[current_track] then
+
+    -- Verify that the event post should be handled
+    if event ~= nil and COSTTrackManager.custom_tracks_map[current_track] then
         -- Update the current track
         if current_track ~= COSTMusicManager.current_track then
             COSTMusicManager.current_track = current_track
@@ -120,18 +113,51 @@ function COSTMusicManager:post_event (event)
             local trad_event = COSTMusicManager.events_table[event]
 
             if COSTMusicManager.current_event ~= trad_event then
+                -- Save and update the event
+                local old_event = COSTMusicManager.current_event
                 COSTMusicManager.current_event = trad_event
-                local is_track_fade = COSTTracks.custom_tracks_map[COSTMusicManager.current_track].fade_transition
-                local fade_duration = COSTTracks.custom_tracks_map[COSTMusicManager.current_track].fade_duration
+
+                -- Get the current track
+                local custom_track = COSTTrackManager.custom_tracks_map[COSTMusicManager.current_track]
 
                 COSTLogger:dev_log(trad_event .. " posted !")
 
-                COSTMusicManager:stop_custom(is_track_fade, fade_duration)
-                COSTMusicManager:play_custom(true, is_track_fade, fade_duration)
+                if custom_track.cost_type == "CustomOSTTrack" then
+
+                    COSTMusicManager.volume_alterators.event = 0
+
+                    if old_event then
+                        COSTMusicManager:stop_custom(custom_track.events_params[old_event].fade_out ~= 0, custom_track.events_params[old_event].fade_out)
+                    end
+                    COSTMusicManager:play_custom(true, custom_track.events_params[COSTMusicManager.current_event].fade_in ~= 0, custom_track.events_params[COSTMusicManager.current_event].fade_in)
+
+                elseif custom_track.cost_type == "CustomOSTSimpleTrack" then
+
+                    if COSTMusicManager.current_event == "setup" then
+                        COSTMusicManager.volume_alterators.event = 0.65
+                    elseif COSTMusicManager.current_event == "control" then
+                        COSTMusicManager.volume_alterators.event = 0.4
+                    elseif COSTMusicManager.current_event == "buildup" then
+                        COSTMusicManager.volume_alterators.event = 0
+                    elseif COSTMusicManager.current_event == "assault" then
+                        COSTMusicManager.volume_alterators.event = 0
+                    end
+
+                    if not COSTMusicManager.x_source then
+                        COSTMusicManager:play_custom(false, false, 0)
+                    else
+                        if COSTMusicManager.x_source._cost_buffer.track ~= COSTMusicManager.current_track then
+                            COSTMusicManager:play_custom(false, false, 0)
+                        end
+                    end
+
+                end
             end
         else
-            if event == "resultscreen_win" or event == "resultscreen_lose" or event == "menu_music" then
+            if event == "resultscreen_win" or event == "resultscreen_lose" or event == "menu_music" or event == "stop_all_music" then
                 if COSTMusicManager.current_track then
+                    COSTMusicManager.current_event = nil
+                    COSTMusicManager.current_track = nil
                     COSTMusicManager:stop_custom(true, 1)
                 end
             else
@@ -141,10 +167,11 @@ function COSTMusicManager:post_event (event)
     end
 end
 
+
 -- Function to play a custom track in the wanted event
 function COSTMusicManager:play_custom (play_start, fade_in, fade_duration)
     if not COSTMusicManager.x_source or COSTMusicManager.x_source:is_closed() then
-        local custom_track = COSTTracks.custom_tracks_map[COSTMusicManager.current_track]
+        local custom_track = COSTTrackManager.custom_tracks_map[COSTMusicManager.current_track]
 
         if custom_track and COSTMusicManager.current_event then
             local cost_buffer = COSTBuffer:create_buffer(custom_track, COSTMusicManager.current_event, play_start)
@@ -158,6 +185,7 @@ function COSTMusicManager:play_custom (play_start, fade_in, fade_duration)
     end
 end
 
+
 -- Function to stop all custom tracks playing
 function COSTMusicManager:stop_custom (fade_out, fade_duration)
     if COSTMusicManager.x_source then
@@ -170,77 +198,63 @@ function COSTMusicManager:stop_custom (fade_out, fade_duration)
     end
 end
 
+
 -- Function to signal a start track end
 function COSTMusicManager:start_finish (event)
     COSTLogger:dev_log("End of the " .. event .. " start source")
     if event == COSTMusicManager.current_event then
-        COSTMusicManager:play_custom(false, false, 1)
+        COSTMusicManager:play_custom(false, false, 0)
     end
 end
+
 
 -- Function to call every tick
 function COSTMusicManager:custom_update (dt, paused)
     if not paused then
 
-        -- Update all the timeouts and trigger them if they are good to go
-        for _, timeout in pairs(COSTMusicManager.timeouts) do
-
-            if timeout.timer ~= nil then
-                timeout.timer = timeout.timer - dt
-                if timeout.timer <= 0 then
-                    timeout.timer = nil
-                    timeout.clbk()
-                end
+        -- Update all timers
+        for name, timer in pairs(COSTMusicManager.timers) do
+            if timer ~= nil then
+                timer:update(dt)
             end
 
-        end
-
-        -- Update the bleedout volume alterator
-        if COSTMusicManager.bleedout_volume_alterator.duration ~= nil and COSTMusicManager.bleedout_volume_alterator.cursor ~= nil then
-            COSTMusicManager.bleedout_volume_alterator.cursor = COSTMusicManager.bleedout_volume_alterator.cursor + dt
-        end
-
-        -- Update the flash grenade volume alterator
-        if COSTMusicManager.flash_volume_alterator.duration ~= nil and COSTMusicManager.flash_volume_alterator.cursor ~= nil then
-            COSTMusicManager.flash_volume_alterator.cursor = COSTMusicManager.flash_volume_alterator.cursor + dt
-            if COSTMusicManager.flash_volume_alterator.cursor > COSTMusicManager.flash_volume_alterator.duration then
-                COSTMusicManager.flash_volume_alterator.duration = nil
-                COSTMusicManager.flash_volume_alterator.cursor = nil
+            if timer:is_finish() then
+                COSTMusicManager.timers[name] = nil
             end
         end
 
     end
 end
+
 
 -- Get the volumae factor
 function COSTMusicManager:get_volume_changer ()
     -- Get the decline factor for the bleedout state
     local decline_factor = 1
-    if COSTMusicManager.bleedout_volume_alterator.duration ~= nil and COSTMusicManager.bleedout_volume_alterator.cursor ~= nil then
-        decline_factor = (COSTMusicManager.bleedout_volume_alterator.duration - COSTMusicManager.bleedout_volume_alterator.cursor) / COSTMusicManager.bleedout_volume_alterator.duration
-        decline_factor = math.max(0, decline_factor)
+    if COSTMusicManager.timers.bleedout ~= nil then
+        decline_factor = math.max(0, COSTMusicManager.timers.bleedout:get_remain_prop())
     end
 
     -- Get the flash factor for the flashbanged state
     local flash_factor = 1
-    if COSTMusicManager.flash_volume_alterator.duration ~= nil and COSTMusicManager.flash_volume_alterator.cursor ~= nil then
-        flash_factor = COSTMusicManager.flash_volume_alterator.cursor / COSTMusicManager.flash_volume_alterator.duration
-        flash_factor = math.max(0, flash_factor)
+    if COSTMusicManager.timers.flashbang ~= nil then
+        flash_factor = math.max(0, COSTMusicManager.timers.flashbang:get_passed_prop())
     end
 
-    if flash_factor ~= 1 then
-        log(flash_factor)
-    end
-
-    local volume_factor = math.max(0.15, (1 - (COSTMusicManager.volume_alterators.feedback + COSTMusicManager.volume_alterators.hit + COSTMusicManager.volume_alterators.speak))) * decline_factor * flash_factor
+    local volume_factor = math.max(0.15, (1 - (COSTMusicManager.volume_alterators.feedback + COSTMusicManager.volume_alterators.hit + COSTMusicManager.volume_alterators.speak + COSTMusicManager.volume_alterators.event))) * decline_factor * flash_factor
     local do_inertia = flash_factor == 1
     return {volume_factor = volume_factor, do_inertia = do_inertia}
 end
+
+
+----- All functions above are to integrate music in the game -----
+
 
 -- Function to call when someone talk in the preplanning 
 function COSTMusicManager:speak_planning ()
     COSTMusicManager.volume_alterators.speak = 0.6
 end
+
 
 -- Function to call when someone talk during the mission
 function COSTMusicManager:speak_mission ()
@@ -248,68 +262,75 @@ function COSTMusicManager:speak_mission ()
         if COSTMusicManager.current_event then
             if COSTMusicManager.current_event == "setup" then
                 COSTMusicManager.volume_alterators.speak = 0.7
-            end
-            if COSTMusicManager.current_event == "control" then
+            elseif COSTMusicManager.current_event == "control" then
                 COSTMusicManager.volume_alterators.speak = 0.65
-            end
-            if COSTMusicManager.current_event == "buildup" then
+            elseif COSTMusicManager.current_event == "buildup" then
                 COSTMusicManager.volume_alterators.speak = 0.5
-            end
-            if COSTMusicManager.current_event == "assault" then
+            elseif COSTMusicManager.current_event == "assault" then
                 COSTMusicManager.volume_alterators.speak = 0.4
             end
         end
     end
 end
 
+
 -- Function to call when nobody speak
 function COSTMusicManager:stop_speak ()
     COSTMusicManager.volume_alterators.speak = 0
 end
 
+
 -- Function to call when there is a feedback sound (gage, loot, small loot...)
 function COSTMusicManager:feedback_sound ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.timeouts.feedback.timer = 2.4
+        COSTMusicManager.timers.feedback = COSTTimer:new(2.4)
+        COSTMusicManager.timers.feedback:set_callback(function () COSTMusicManager.volume_alterators.feedback = 0 end)
         COSTMusicManager.volume_alterators.feedback = 0.75
     end
 end
+
 
 -- Function to call when the player recieve a new objective
 function COSTMusicManager:objective_sound ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.timeouts.feedback.timer = 2.8
+        COSTMusicManager.timers.feedback = COSTTimer:new(2.8)
+        COSTMusicManager.timers.feedback:set_callback(function () COSTMusicManager.volume_alterators.feedback = 0 end)
         COSTMusicManager.volume_alterators.feedback = 0.75
     end
 end
 
+
 -- Function to call when the player is hit
 function COSTMusicManager:hit_sound ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.timeouts.hit.timer = 0.7
-        COSTMusicManager.volume_alterators.hit = 0.3
+        COSTMusicManager.timers.hit = COSTTimer:new(0.6)
+        COSTMusicManager.timers.hit:set_callback(function () COSTMusicManager.volume_alterators.hit = 0 end)
+        COSTMusicManager.volume_alterators.hit = 0.4
     end
 end
+
 
 -- Function to enter in the bleedout state
 function COSTMusicManager:bleedout_enter ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.bleedout_volume_alterator.duration = 27
-        COSTMusicManager.bleedout_volume_alterator.cursor = 0
+        COSTMusicManager.timers.bleedout = COSTTimer:new(27)
+        COSTMusicManager.timers.bleedout:set_delay(4)
     end
 end
+
 
 -- Function to return to the standard state
 function COSTMusicManager:standard_enter ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.bleedout_volume_alterator.duration = nil
-        COSTMusicManager.bleedout_volume_alterator.cursor = nil
+        COSTMusicManager.timers.bleedout = nil
     end
 end
 
+
+-- Function to call when the player is flashed
 function COSTMusicManager:flash_grenade (sound_factor)
     if COSTMusicManager.current_track then
-        COSTMusicManager.flash_volume_alterator.duration = 10
-        COSTMusicManager.flash_volume_alterator.cursor = 7 - (10 * sound_factor)
+        COSTMusicManager.timers.flashbang = COSTTimer:new(10)
+        COSTMusicManager.timers.flashbang:set_cursor(7 - (10 * sound_factor))
     end
 end

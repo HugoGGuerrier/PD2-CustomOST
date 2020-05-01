@@ -10,6 +10,8 @@ function file:FileExists (file_to_test)
     end
 end
 
+
+-- Create a directory
 function file:MakeDir (dir_to_create)
     if not file.DirectoryExists(dir_to_create) then
         if not file:FileExists(dir_to_create) then
@@ -17,6 +19,18 @@ function file:MakeDir (dir_to_create)
         end
     end
 end
+
+
+-- Split a string with a token
+function split_string (str, token)
+    token = token or "%s"
+    local res = {}
+    for elem in string.gmatch(str, "[^\\" .. token .. "]+") do
+        table.insert(res, elem)
+    end
+    return res
+end
+
 
 -- Print any var simply!
 function smart_print (val, indent)

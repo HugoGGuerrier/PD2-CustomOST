@@ -7,12 +7,11 @@ function COSTXSource:init (cost_buffer)
 
     -- Set the custom attibutes
     self._cost_buffer = cost_buffer
-    self._fade_in_cursor = nil
-    self._fade_in_duration = nil
+
+    self._fade_in_timer = nil
     self._fade_in_target = nil
 
-    self._fade_out_cursor = nil
-    self._fade_out_duration = nil
+    self._fade_out_timer = nil
     self._fade_out_start = nil
 
     self._volume_inertia = 0.6
@@ -38,15 +37,13 @@ end
 -- Make a fade in with the music
 function COSTXSource:fade_in (duration)
     self:set_volume(0)
-    self._fade_in_cursor = 0
-    self._fade_in_duration = duration
+    self._fade_in_timer = COSTTimer:new(duration)
     self._fade_in_target = self._cost_buffer.volume
 end
 
 function COSTXSource:fade_out (duration)
-    self._fade_out_cursor = 0
+    self._fade_out_timer = COSTTimer:new(duration)
     self._fade_out_start = self:get_volume()
-    self._fade_out_duration = duration
 end
 
 -- Function to update the source every tick
@@ -57,37 +54,33 @@ function COSTXSource:update (t, dt, paused)
     COSTMusicManager:custom_update(dt, paused)
 
     -- Process the fades
-    if self._fade_out_cursor then
+    if self._fade_out_timer then
 
-        self._fade_out_cursor = self._fade_out_cursor + dt
+        self._fade_out_timer:update(dt)
 
-        if self._fade_out_cursor < self._fade_out_duration then
-            local fade_out_factor = (self._fade_out_duration - self._fade_out_cursor) / self._fade_out_duration
-            self:set_volume((self._fade_out_start * fade_out_factor) * COSTMusicManager:get_volume_changer().volume_factor)
+        if not self._fade_out_timer:is_finish() then
+            self:set_volume((self._fade_out_start * self._fade_out_timer:get_remain_prop()) * COSTMusicManager:get_volume_changer().volume_factor)
         else
-            self._fade_out_cursor = nil
-            self._fade_out_duration = nil
+            self._fade_out_timer = nil
             self._fade_out_start = nil
             self:close()
         end
 
-    else if self._fade_in_cursor then
+    elseif self._fade_in_timer then
 
-        self._fade_in_cursor = self._fade_in_cursor + dt
+        self._fade_in_timer:update(dt)
 
-        if self._fade_in_cursor < self._fade_in_duration then
-            local fade_in_factor = self._fade_in_cursor / self._fade_in_duration
-            self:set_volume((self._fade_in_target * fade_in_factor) * COSTMusicManager:get_volume_changer().volume_factor)
+        if not self._fade_in_timer:is_finish() then
+            self:set_volume((self._fade_in_target * self._fade_in_timer:get_passed_prop()) * COSTMusicManager:get_volume_changer().volume_factor)
         else
             self:set_volume(self._fade_in_target * COSTMusicManager:get_volume_changer().volume_factor)
-            self._fade_in_cursor = nil
-            self._fade_in_duration = nil
+            self._fade_in_timer = nil
             self._fade_in_target = nil
         end
 
     else
 
-        -- Make the sound inertia effect
+        -- Make the sound dynamic volume changing
         local volume_changer = COSTMusicManager:get_volume_changer()
         local target_volume = self._cost_buffer.volume * volume_changer.volume_factor
         local current_volume = self:get_volume()
@@ -95,6 +88,8 @@ function COSTXSource:update (t, dt, paused)
         if target_volume ~= current_volume then
 
             if volume_changer.do_inertia then
+
+                -- Make the inertia effect
                 local volume_to_add = (dt / self._volume_inertia) * self._cost_buffer.volume
                 if target_volume > current_volume then
                     if target_volume <= (current_volume + volume_to_add) then
@@ -109,11 +104,15 @@ function COSTXSource:update (t, dt, paused)
                         self:set_volume(current_volume - volume_to_add)
                     end
                 end
+
             else
+
+                -- Avoid the inertia for flashbang
                 self:set_volume(target_volume)
+
             end
 
         end
         
-    end end
+    end
 end

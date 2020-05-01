@@ -1,9 +1,19 @@
 Custom OST Changelog
 
+### 0.11a
+
+* Implement the "one file, one track" feature !
+* Make the fade in/fade out setting for each event
+* Patch a crash that can happen when void event is posted
+* Remove the "fade_transition" setting which is useless now
+* Correct the default heist track selection bug
+* Correct the FUC**** manual
+* Optimize the code a LOT
+
 ### 0.10a
 
-* Add the flashbang dynamic music
-* Optimize the dynamic music
+* Add the flashbang dynamic music volume
+* Optimize the dynamic music volume
 * Correct some minor bugs
 
 ### 0.9a :
