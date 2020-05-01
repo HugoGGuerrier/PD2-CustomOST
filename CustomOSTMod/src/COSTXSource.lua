@@ -19,7 +19,7 @@ function COSTXSource:init (cost_buffer)
 
     -- Set the parameters value
     self:set_looping(self._cost_buffer.is_looping)
-    self:set_volume(self._cost_buffer.volume * COSTMusicManager:get_volume_factor())
+    self:set_volume(self._cost_buffer.volume * COSTMusicManager:get_volume_changer().volume_factor)
     self:set_relative(true)
     self:set_single_sound(true)
     self:set_type(XAudio.Source.MUSIC)
@@ -54,7 +54,7 @@ function COSTXSource:update (t, dt, paused)
     XAudio.Source.update(self, t, dt, paused)
 
     -- Call the music manager update
-    COSTMusicManager:custom_update(dt)
+    COSTMusicManager:custom_update(dt, paused)
 
     -- Process the fades
     if self._fade_out_cursor then
@@ -63,7 +63,7 @@ function COSTXSource:update (t, dt, paused)
 
         if self._fade_out_cursor < self._fade_out_duration then
             local fade_out_factor = (self._fade_out_duration - self._fade_out_cursor) / self._fade_out_duration
-            self:set_volume((self._fade_out_start * fade_out_factor) * COSTMusicManager:get_volume_factor())
+            self:set_volume((self._fade_out_start * fade_out_factor) * COSTMusicManager:get_volume_changer().volume_factor)
         else
             self._fade_out_cursor = nil
             self._fade_out_duration = nil
@@ -77,33 +77,43 @@ function COSTXSource:update (t, dt, paused)
 
         if self._fade_in_cursor < self._fade_in_duration then
             local fade_in_factor = self._fade_in_cursor / self._fade_in_duration
-            self:set_volume((self._fade_in_target * fade_in_factor) * COSTMusicManager:get_volume_factor())
+            self:set_volume((self._fade_in_target * fade_in_factor) * COSTMusicManager:get_volume_changer().volume_factor)
         else
-            self:set_volume(self._fade_in_target * COSTMusicManager:get_volume_factor())
+            self:set_volume(self._fade_in_target * COSTMusicManager:get_volume_changer().volume_factor)
             self._fade_in_cursor = nil
             self._fade_in_duration = nil
             self._fade_in_target = nil
         end
 
     else
-        local target_volume = self._cost_buffer.volume * COSTMusicManager:get_volume_factor()
+
+        -- Make the sound inertia effect
+        local volume_changer = COSTMusicManager:get_volume_changer()
+        local target_volume = self._cost_buffer.volume * volume_changer.volume_factor
         local current_volume = self:get_volume()
+
         if target_volume ~= current_volume then
-            local volume_to_add = (dt / self._volume_inertia) * self._cost_buffer.volume
-            if target_volume > current_volume then
-                if target_volume <= (current_volume + volume_to_add) then
-                    self:set_volume(target_volume)
+
+            if volume_changer.do_inertia then
+                local volume_to_add = (dt / self._volume_inertia) * self._cost_buffer.volume
+                if target_volume > current_volume then
+                    if target_volume <= (current_volume + volume_to_add) then
+                        self:set_volume(target_volume)
+                    else
+                        self:set_volume(current_volume + volume_to_add)
+                    end
                 else
-                    self:set_volume(current_volume + volume_to_add)
+                    if target_volume >= (current_volume - volume_to_add) then
+                        self:set_volume(target_volume)
+                    else
+                        self:set_volume(current_volume - volume_to_add)
+                    end
                 end
             else
-                if target_volume >= (current_volume - volume_to_add) then
-                    self:set_volume(target_volume)
-                else
-                    self:set_volume(current_volume - volume_to_add)
-                end
+                self:set_volume(target_volume)
             end
 
         end
+        
     end end
 end

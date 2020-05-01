@@ -61,6 +61,12 @@ if do_hooks then
         end
     end)
 
+    Hooks:PostHook(PlayerDamage, "on_flashbanged", "JDKSJDKSD", function (_, sound_eff_mul)
+        if sound_eff_mul then
+            COSTMusicManager:flash_grenade(sound_eff_mul)
+        end
+    end)
+
     COSTLogger:dev_log("Hooks loaded !")
 
 end

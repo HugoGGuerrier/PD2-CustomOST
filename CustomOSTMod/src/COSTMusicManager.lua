@@ -34,7 +34,12 @@ COSTMusicManager.timeouts = {
     }
 }
 
-COSTMusicManager.volume_decline = {
+COSTMusicManager.bleedout_volume_alterator = {
+    duration = nil,
+    cursor = nil
+}
+
+COSTMusicManager.flash_volume_alterator = {
     duration = nil,
     cursor = nil
 }
@@ -174,34 +179,62 @@ function COSTMusicManager:start_finish (event)
 end
 
 -- Function to call every tick
-function COSTMusicManager:custom_update (dt)
-    -- Update all the timeouts and trigger them if they are good to go
-    for _, timeout in pairs(COSTMusicManager.timeouts) do
+function COSTMusicManager:custom_update (dt, paused)
+    if not paused then
 
-        if timeout.timer ~= nil then
-            timeout.timer = timeout.timer - dt
-            if timeout.timer <= 0 then
-                timeout.timer = nil
-                timeout.clbk()
+        -- Update all the timeouts and trigger them if they are good to go
+        for _, timeout in pairs(COSTMusicManager.timeouts) do
+
+            if timeout.timer ~= nil then
+                timeout.timer = timeout.timer - dt
+                if timeout.timer <= 0 then
+                    timeout.timer = nil
+                    timeout.clbk()
+                end
+            end
+
+        end
+
+        -- Update the bleedout volume alterator
+        if COSTMusicManager.bleedout_volume_alterator.duration ~= nil and COSTMusicManager.bleedout_volume_alterator.cursor ~= nil then
+            COSTMusicManager.bleedout_volume_alterator.cursor = COSTMusicManager.bleedout_volume_alterator.cursor + dt
+        end
+
+        -- Update the flash grenade volume alterator
+        if COSTMusicManager.flash_volume_alterator.duration ~= nil and COSTMusicManager.flash_volume_alterator.cursor ~= nil then
+            COSTMusicManager.flash_volume_alterator.cursor = COSTMusicManager.flash_volume_alterator.cursor + dt
+            if COSTMusicManager.flash_volume_alterator.cursor > COSTMusicManager.flash_volume_alterator.duration then
+                COSTMusicManager.flash_volume_alterator.duration = nil
+                COSTMusicManager.flash_volume_alterator.cursor = nil
             end
         end
 
     end
-
-    -- Update the colume decliner
-    if COSTMusicManager.volume_decline.duration ~= nil and COSTMusicManager.volume_decline.cursor ~= nil then
-        COSTMusicManager.volume_decline.cursor = COSTMusicManager.volume_decline.cursor + dt
-    end
 end
 
 -- Get the volumae factor
-function COSTMusicManager:get_volume_factor ()
+function COSTMusicManager:get_volume_changer ()
+    -- Get the decline factor for the bleedout state
     local decline_factor = 1
-    if COSTMusicManager.volume_decline.duration ~= nil and COSTMusicManager.volume_decline.cursor ~= nil then
-        decline_factor = (COSTMusicManager.volume_decline.duration - COSTMusicManager.volume_decline.cursor) / COSTMusicManager.volume_decline.duration
+    if COSTMusicManager.bleedout_volume_alterator.duration ~= nil and COSTMusicManager.bleedout_volume_alterator.cursor ~= nil then
+        decline_factor = (COSTMusicManager.bleedout_volume_alterator.duration - COSTMusicManager.bleedout_volume_alterator.cursor) / COSTMusicManager.bleedout_volume_alterator.duration
         decline_factor = math.max(0, decline_factor)
     end
-    return math.max(0.15, (1 - (COSTMusicManager.volume_alterators.feedback + COSTMusicManager.volume_alterators.hit + COSTMusicManager.volume_alterators.speak))) * decline_factor
+
+    -- Get the flash factor for the flashbanged state
+    local flash_factor = 1
+    if COSTMusicManager.flash_volume_alterator.duration ~= nil and COSTMusicManager.flash_volume_alterator.cursor ~= nil then
+        flash_factor = COSTMusicManager.flash_volume_alterator.cursor / COSTMusicManager.flash_volume_alterator.duration
+        flash_factor = math.max(0, flash_factor)
+    end
+
+    if flash_factor ~= 1 then
+        log(flash_factor)
+    end
+
+    local volume_factor = math.max(0.15, (1 - (COSTMusicManager.volume_alterators.feedback + COSTMusicManager.volume_alterators.hit + COSTMusicManager.volume_alterators.speak))) * decline_factor * flash_factor
+    local do_inertia = flash_factor == 1
+    return {volume_factor = volume_factor, do_inertia = do_inertia}
 end
 
 -- Function to call when someone talk in the preplanning 
@@ -237,7 +270,7 @@ end
 -- Function to call when there is a feedback sound (gage, loot, small loot...)
 function COSTMusicManager:feedback_sound ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.timeouts.feedback.timer = 2.2
+        COSTMusicManager.timeouts.feedback.timer = 2.4
         COSTMusicManager.volume_alterators.feedback = 0.75
     end
 end
@@ -245,7 +278,7 @@ end
 -- Function to call when the player recieve a new objective
 function COSTMusicManager:objective_sound ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.timeouts.feedback.timer = 2.6
+        COSTMusicManager.timeouts.feedback.timer = 2.8
         COSTMusicManager.volume_alterators.feedback = 0.75
     end
 end
@@ -261,15 +294,22 @@ end
 -- Function to enter in the bleedout state
 function COSTMusicManager:bleedout_enter ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.volume_decline.duration = 27
-        COSTMusicManager.volume_decline.cursor = 0
+        COSTMusicManager.bleedout_volume_alterator.duration = 27
+        COSTMusicManager.bleedout_volume_alterator.cursor = 0
     end
 end
 
 -- Function to return to the standard state
 function COSTMusicManager:standard_enter ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.volume_decline.duration = nil
-        COSTMusicManager.volume_decline.cursor = nil
+        COSTMusicManager.bleedout_volume_alterator.duration = nil
+        COSTMusicManager.bleedout_volume_alterator.cursor = nil
+    end
+end
+
+function COSTMusicManager:flash_grenade (sound_factor)
+    if COSTMusicManager.current_track then
+        COSTMusicManager.flash_volume_alterator.duration = 10
+        COSTMusicManager.flash_volume_alterator.cursor = 7 - (10 * sound_factor)
     end
 end
