@@ -1,3 +1,6 @@
+------ All utils functions that helps -------
+
+
 -- Add the function FileExists to the blt file class
 function file.FileExists (file_to_test)
     local f = io.open(file_to_test, "r")

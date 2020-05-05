@@ -1,3 +1,6 @@
+------ Class that contains a timer ------
+
+
 COSTTimer = COSTTimer or class()
 
 
@@ -43,7 +46,7 @@ end
 
 -- Get if the timer is finish
 function COSTTimer:is_finish ()
-    return self._cursor >= self._duration + self._delay
+    return self._cursor >= (self._duration + self._delay)
 end
 
 

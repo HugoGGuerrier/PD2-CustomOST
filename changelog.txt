@@ -1,5 +1,18 @@
 Custom OST Changelog
 
+> ### 0.12a
+
+* Introduce the error messages !
+* Implement mod configuration file !
+* Optimize a lot the track loading
+* Re-think the mod architecture
+* OOP saved my soul
+* Correct the bug that make the music overlap the result screen
+* Correct the bug that make the music continue when you come back from the heist default track menu
+* Correct the Beardlib Music Mods importation bug when there are more than one track
+* Make the code more robust
+* Rebalance audio effects
+
 ### 0.11a
 
 * Implement the "one file, one track" feature !

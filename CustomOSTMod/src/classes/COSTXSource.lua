@@ -1,3 +1,6 @@
+------ Class which inherits from the XAudio source to make custom music playing ------
+
+
 COSTXSource = class(XAudio.Source)
 
 -- Init the source object with a custom buffer
