@@ -1,6 +1,0 @@
-{
-    "dev": false,
-    "do_hook": true,
-    "load_timeout": 4.5,
-    "default_fade_duration": 1
-}

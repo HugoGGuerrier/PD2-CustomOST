@@ -1,0 +1,38 @@
+{
+    "costn_menu_title": "CUSTOM OST",
+    "costn_menu_desc": "Set options for the Custom OST mod",
+
+    "costn_default_fade_duration_choice_title": "Default fade duration",
+    "costn_default_fade_duration_choice_desc": "Default duration of the fade transitions between phases",
+    "costn_default_fade_duration_choice_0": "0 sec",
+    "costn_default_fade_duration_choice_1": "0.5 sec",
+    "costn_default_fade_duration_choice_2": "1 sec",
+    "costn_default_fade_duration_choice_3": "1.5 sec",
+    "costn_default_fade_duration_choice_4": "2 sec",
+    "costn_default_fade_duration_choice_5": "2.5 sec",
+    "costn_default_fade_duration_choice_6": "3 sec",
+
+    "costn_dynamic_load_toogle_title": "Dynamic track loading",
+    "costn_dynamic_load_toogle_desc": "Enable/Disable the dynamic track loading - Load a track only when you choose it - Recommended if you have more than 200MB of music (Default is off)",
+
+    "costn_load_timeout_choice_title": "Load timeout",
+    "costn_load_timeout_choice_desc": "The maximum mod loading time during the game startup (Set it to 'Disable' to load all tracks during the game startup)",
+    "costn_load_timeout_choice_0": "Disable",
+    "costn_load_timeout_choice_1": "0 sec",
+    "costn_load_timeout_choice_2": "1 sec",
+    "costn_load_timeout_choice_3": "2 sec",
+    "costn_load_timeout_choice_4": "3 sec",
+    "costn_load_timeout_choice_5": "4 sec",
+    "costn_load_timeout_choice_6": "5 sec",
+    "costn_load_timeout_choice_7": "6 sec",
+    "costn_load_timeout_choice_8": "7 sec",
+    "costn_load_timeout_choice_9": "8 sec",
+    "costn_load_timeout_choice_10": "9 sec",
+    "costn_load_timeout_choice_11": "10 sec",
+
+    "costn_dev_toogle_title": "Debug Logs",
+    "costn_dev_toogle_desc": "Enable/Disable the development logs (Default is off)",
+
+    "costn_hook_toogle_title": "Do hooks",
+    "costn_hook_toogle_desc": "Enable/Disable the hooks loading (Default is on)"
+}

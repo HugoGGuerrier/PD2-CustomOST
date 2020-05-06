@@ -22,8 +22,7 @@ else
 end
 
 -- Load the mod config
-local config_file = ModPath .. "config.txt"
-COSTConfig:load_config(config_file)
+COSTConfig:load_config()
 
 -- Load the bases sources
 if file.DirectoryExists(bases_dir_path) then
@@ -121,8 +120,10 @@ if file.DirectoryExists(tracks_dir_path) then
         end
     end
 
-    -- Launch the track file loading
-    COSTTrackManager:load_tracks_files()
+    -- Launch the track file loading if the dynamic loading is not active
+    if not COSTConfig.dynamic_load then
+        COSTTrackManager:load_tracks_files()
+    end
 else
     COSTLogger:dev_log("Tracks directory was not found... The mod has created one")
     file.MakeDir(tracks_dir_path)
@@ -132,12 +133,81 @@ end
 Global.custom_ost_indicators.game_init = true
 
 
+------ Create the and function to make the mod menu ------
+
+
+-- Load the menu localization
+local loc_file = ModPath .. "loc/en.txt"
+
+Hooks:Add("LocalizationManagerPostInit", "CustomOSTMenuLocalization", function ()
+    if file.FileExists(loc_file) then
+        local loc_f = io.open(loc_file, "r")
+        local loc_json_string = loc_f:read("*all")
+        loc_f:close()
+
+        local valid, loc_json_table = pcall(function () return json.decode(loc_json_string) end)
+        if valid then
+            LocalizationManager:add_localized_strings(loc_json_table, false)
+        else
+            COSTLogger:log_err("Error during the menu localization file parsing : " .. loc_file)
+        end
+    else
+        COSTLogger:log_err(loc_file .. " is missing or unreadable")
+    end
+end)
+
+-- Create the menu callback functions
+MenuCallbackHandler.costn_save = function ()
+    COSTConfig:save_config()
+end
+
+MenuCallbackHandler.costn_default_fade_duration_choice = function (_, v)
+    COSTConfig.default_fade_duration = COSTConfig.fade_duration_trad[v._current_index]
+end
+
+MenuCallbackHandler.costn_dynamic_load_toogle = function (_, v)
+    local _, timeout_choice = pcall(function () for _, item in pairs(MenuHelper:GetMenu("costn_menu")._items) do if item._parameters.name == "costn_load_timeout_choice" then return item end end return nil end)
+    if v.selected == 1 then
+        COSTConfig.dynamic_load = true
+        timeout_choice._enabled = false
+    else
+        COSTConfig.dynamic_load = false
+        timeout_choice._enabled = true
+    end
+    timeout_choice:dirty_callback()
+end
+
+MenuCallbackHandler.costn_load_timeout_choice = function (_, v)
+    COSTConfig.load_timeout = COSTConfig.load_timeout_trad[v._current_index]
+end
+
+MenuCallbackHandler.costn_dev_toogle = function (_, v)
+    COSTConfig.dev = v.selected == 1
+end
+
+MenuCallbackHandler.costn_hook_toogle = function (_, v)
+    COSTConfig.do_hook = v.selected == 1
+end
+
+
+-- Add the mod menu
+local menu_id = "costn_menu"
+local menu_file = ModPath .. "res/mod_menu.json"
+
+Hooks:Add("MenuManagerSetupCustomMenus", "MenuManagerSetupCustomMenus_Example", function(_, _)
+    MenuHelper:NewMenu(menu_id)
+end)
+
+Hooks:Add("MenuManagerPopulateCustomMenus", "MenuManagerPopulateCustomMenus_Example", function(_, _)
+    MenuHelper:LoadFromJsonFile(menu_file, {}, COSTConfig:get_menu_params())
+end)
+
 ------ Create the hooks to insert custom tracks in the game ------
 
 
 if COSTConfig.do_hook then
 
-    -- Create the hook to insert the custom tracks in the jukebox menu and the playlist menu
+    -- Create hooks to insert the custom tracks in the jukebox menu and the playlist menu
     Hooks:Add("LocalizationManagerPostInit", "CustomOSTTracksLocalization", function()
         COSTTrackManager:load_tracks_loc()
     end)
@@ -155,12 +225,21 @@ if COSTConfig.do_hook then
         COSTMusicManager:track_listen_stop()
     end)
 
+    Hooks:PostHook(MusicManager, "on_mission_end", "CustomOSTMissionEnd", function ()
+        COSTMusicManager:stop_and_clean(true, 1)
+    end)
+
     Hooks:PostHook(MusicManager, "stop", "CustomOSTStop", function()
-        COSTMusicManager:stop_custom(false, 1)
+        COSTMusicManager:stop_and_clean(false, 0)
     end)
 
     Hooks:PostHook(MusicManager, "post_event", "CustomOSTPostEvent", function(_, name)
         COSTMusicManager:post_event(name)
+    end)
+
+    -- Compatibility with Music Control
+    Hooks:PreHook(Music, "Call", "CustomOSTMusicControlCompats", function (_, _, song, event, _)
+        Global.music_manager.current_track = song
     end)
 
 end

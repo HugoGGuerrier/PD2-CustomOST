@@ -70,9 +70,9 @@ function COSTTrackManager:create_track_from_xml (track_file, dir)
     -- Load the track config
     local f = io.open(track_file, "r")
     local track_xml_string = f:read("*all")
-    local valid, track_xml_table = pcall(function () return ScriptSerializer:from_custom_xml(track_xml_string) end)
     f:close()
 
+    local valid, track_xml_table = pcall(function () return ScriptSerializer:from_custom_xml(track_xml_string) end)
     if not valid then
         COSTLogger:log_err(track_file .. " XML file is malformed")
         return nil
@@ -182,6 +182,10 @@ function COSTTrackManager:_add_standard_track (track_table)
     new_track:set_dir(track_table.dir)
 
     for event, params in pairs(track_table.events) do
+        -- Handle the other event name
+        if event == "stealth" then event = "setup" end
+        if event == "anticipation" then event = "buildup" end
+
         new_track:set_event_start_file(event, params.start_file)
         new_track:set_event_file(event, params.file)
 

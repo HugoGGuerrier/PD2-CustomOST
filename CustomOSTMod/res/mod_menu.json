@@ -1,0 +1,93 @@
+{
+    "menu_id" : "costn_menu",
+    "parent_menu_id" : "blt_options",
+    "title" : "costn_menu_title",
+    "description" : "costn_menu_desc",
+    "back_callback" : "costn_save",
+    "items" : [
+
+        {
+            "type" : "multiple_choice",
+            "id" : "costn_default_fade_duration_choice",
+            "title" : "costn_default_fade_duration_choice_title",
+            "description" : "costn_default_fade_duration_choice_desc",
+            "callback" : "costn_default_fade_duration_choice",
+            "items" : [
+                "costn_default_fade_duration_choice_0",
+                "costn_default_fade_duration_choice_1",
+                "costn_default_fade_duration_choice_2",
+                "costn_default_fade_duration_choice_3",
+                "costn_default_fade_duration_choice_4",
+                "costn_default_fade_duration_choice_5",
+                "costn_default_fade_duration_choice_6"
+            ],
+            "value" : "default_fade_duration",
+            "default_value" : 3
+        },
+
+        {
+            "type" : "divider",
+            "size" : 10
+        },
+
+        {
+            "type" : "toggle",
+            "id" : "costn_dynamic_load_toogle",
+            "title" : "costn_dynamic_load_toogle_title",
+            "description" : "costn_dynamic_load_toogle_desc",
+            "callback" : "costn_dynamic_load_toogle",
+            "value" : "dynamic_load",
+            "default_value" : false
+        },
+
+        {
+            "type" : "multiple_choice",
+            "id" : "costn_load_timeout_choice",
+            "title" : "costn_load_timeout_choice_title",
+            "description" : "costn_load_timeout_choice_desc",
+            "callback" : "costn_load_timeout_choice",
+            "items" : [
+                "costn_load_timeout_choice_0",
+                "costn_load_timeout_choice_1",
+                "costn_load_timeout_choice_2",
+                "costn_load_timeout_choice_3",
+                "costn_load_timeout_choice_4",
+                "costn_load_timeout_choice_5",
+                "costn_load_timeout_choice_6",
+                "costn_load_timeout_choice_7",
+                "costn_load_timeout_choice_8",
+                "costn_load_timeout_choice_9",
+                "costn_load_timeout_choice_10",
+                "costn_load_timeout_choice_11"
+            ],
+            "value" : "load_timeout",
+            "default_value" : 6
+        },
+
+        {
+            "type" : "divider",
+            "size" : 10
+        },
+
+        {
+            "type" : "toggle",
+            "id" : "costn_dev_toogle",
+            "title" : "costn_dev_toogle_title",
+            "description" : "costn_dev_toogle_desc",
+            "callback" : "costn_dev_toogle",
+            "value" : "dev",
+            "default_value" : false
+        },
+
+        {
+            "type" : "toggle",
+            "id" : "costn_hook_toogle",
+            "title" : "costn_hook_toogle_title",
+            "description" : "costn_hook_toogle_desc",
+            "callback" : "costn_hook_toogle",
+            "value" : "do_hook",
+            "default_value" : true
+        }
+
+    ]
+}

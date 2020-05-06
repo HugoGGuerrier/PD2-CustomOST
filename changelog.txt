@@ -1,6 +1,14 @@
 Custom OST Changelog
 
-> ### 0.12a
+> ### 0.13a
+
+* Make compatibility with Music Control mod : https://modworkshop.net/mod/20833
+* Add a mod menu to set the options
+* Add the dynamic track loading to optimize loading if you have more than 200MB of music
+* Optimize the track playing code
+* Correct some minor bugs
+
+### 0.12a
 
 * Introduce the error messages !
 * Implement mod configuration file !

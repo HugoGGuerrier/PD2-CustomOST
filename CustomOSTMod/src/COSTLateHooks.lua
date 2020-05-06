@@ -53,15 +53,6 @@ if COSTConfig.do_hook then
         COSTMusicManager:standard_enter()
     end)
 
-    -- When the mission finish (lose or win or kicked)
-    Hooks:PostHook(MissionEndState, "at_enter", "CustomOSTMissionEndEnter", function ()
-        if COSTMusicManager.current_track then
-            COSTMusicManager.current_event = nil
-            COSTMusicManager.current_track = nil
-            COSTMusicManager:stop_custom(true, 1)
-        end
-    end)
-
     -- When there is a hint that appears on the screen
     Hooks:PostHook(HUDManager, "show_hint", "CustomOSTHintFeedbakcSoundSound", function (_, params)
         if params.event then

@@ -40,7 +40,6 @@ COSTMusicManager.timers = {
 function COSTMusicManager:track_listen_start (event, track)
     -- Only if track exists
     if track then
-
         -- Test if the track is a custom track
         local custom_track = COSTTrackManager.custom_tracks_map[track]
         local trad_event = COSTMusicManager.events_table[event]
@@ -62,13 +61,8 @@ function COSTMusicManager:track_listen_start (event, track)
 
             end
         else
-            -- Remove the current state
-            COSTMusicManager.current_event = nil
-            COSTMusicManager.current_track = nil
-
-            -- Stop the custom music
+            COSTMusicManager:stop_and_clean(false, 0)
             COSTLogger:dev_log("Other track listen start !")
-            COSTMusicManager:stop_custom(false, 1)
         end
 
     end
@@ -76,13 +70,7 @@ function COSTMusicManager:track_listen_start (event, track)
     -- Handle music stopping in the menu
     if event and event == "stop_all_music" then
         if COSTMusicManager.current_track then
-            -- Remove the current state
-            COSTMusicManager.current_event = nil
-            COSTMusicManager.current_track = nil
-
-            -- Stop the custom music
-            COSTLogger:dev_log("Other choice in the ost menu !")
-            COSTMusicManager:stop_custom(false, 1)
+            COSTMusicManager:stop_and_clean(false, 0)
         end
     end
 
@@ -92,10 +80,8 @@ end
 -- Function to handle stop music preview in the loadout menu
 function COSTMusicManager:track_listen_stop ()
     if COSTMusicManager.current_track then
-        COSTMusicManager.current_track = nil
-        COSTMusicManager.current_event = nil
+        COSTMusicManager:stop_and_clean(true, 1)
         COSTLogger:dev_log("Track listen stop !")
-        COSTMusicManager:stop_custom(true, 1)
     end
 end
 
@@ -103,12 +89,12 @@ end
 -- Fuction to handle event changing in the heist
 function COSTMusicManager:post_event (event)
     -- Get the current track even without excplicit selection
-    local current_track = COSTMusicManager.current_track or Global.music_manager.loadout_selection
+    local current_track = Global.music_manager.current_track
 
     -- Verify that the event post should be handled
-    if event ~= nil and COSTTrackManager.custom_tracks_map[current_track] then
+    if COSTTrackManager.custom_tracks_map[current_track] then
         -- Update the current track
-        if current_track ~= COSTMusicManager.current_track then
+        if COSTMusicManager.current_track ~= current_track then
             COSTMusicManager.current_track = current_track
         end
 
@@ -151,6 +137,7 @@ function COSTMusicManager:post_event (event)
                         COSTMusicManager:play_custom(false, false, 0)
                     else
                         if COSTMusicManager.x_source._cost_buffer.track ~= COSTMusicManager.current_track then
+                            COSTMusicManager:stop_custom(false, 0)
                             COSTMusicManager:play_custom(false, false, 0)
                         end
                     end
@@ -158,12 +145,20 @@ function COSTMusicManager:post_event (event)
                 end
             end
         else
-            if COSTMusicManager.current_track then
-                COSTMusicManager.current_event = nil
-                COSTMusicManager.current_track = nil
-                COSTMusicManager:stop_custom(true, 1)
-            end
+            COSTMusicManager:stop_and_clean(true, 1)
         end
+    else
+        COSTMusicManager:stop_and_clean(false, 0)
+    end
+end
+
+
+-- Function to clean track selection and stop
+function COSTMusicManager:stop_and_clean (fade, fade_duration)
+    if COSTMusicManager.current_track ~= nil then
+        COSTMusicManager.current_event = nil
+        COSTMusicManager.current_track = nil
+        COSTMusicManager:stop_custom(fade, fade_duration)
     end
 end
 
@@ -338,6 +333,6 @@ end
 function COSTMusicManager:flash_grenade (sound_factor)
     if COSTMusicManager.current_track then
         COSTMusicManager.timers.flashbang = COSTTimer:new(10)
-        COSTMusicManager.timers.flashbang:set_cursor(5.8 - (10 * sound_factor))
+        COSTMusicManager.timers.flashbang:set_cursor(5.2 - (10 * sound_factor))
     end
 end

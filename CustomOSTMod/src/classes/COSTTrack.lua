@@ -170,13 +170,19 @@ function COSTTrack:get_cost_buffer (event, play_start)
 
         if not self._events_buffers[event].start_source_buffer then
             if not self._error then
-                local start_source_path = self._dir .. self._events_files[event].start_source_file
-                local valid, buffer = pcall(function () return XAudio.Buffer:new(start_source_path) end)
-                if valid then
-                    self._events_buffers[event].start_source_buffer = buffer
+
+                if COSTConfig.dynamic_load then
+                    self:load_files()
                 else
-                    self:set_error("Cannot load the file " .. start_source_path .. ", please verify the file integrity")
+                    local start_source_path = self._dir .. self._events_files[event].start_source_file
+                    local valid, buffer = pcall(function () return XAudio.Buffer:new(start_source_path) end)
+                    if valid then
+                        self._events_buffers[event].start_source_buffer = buffer
+                    else
+                        self:set_error("Cannot load the file " .. start_source_path .. ", please verify the file integrity")
+                    end
                 end
+                
             end
         end
         res.buffer = self._events_buffers[event].start_source_buffer
@@ -187,13 +193,19 @@ function COSTTrack:get_cost_buffer (event, play_start)
 
         if not self._events_buffers[event].source_buffer then
             if not self._error then
-                local source_path = self._dir .. self._events_files[event].source_file
-                local valid, buffer = pcall(function () return XAudio.Buffer:new(source_path) end)
-                if valid then
-                    self._events_buffers[event].source_buffer = buffer
+
+                if COSTConfig.dynamic_load then
+                    self:load_files()
                 else
-                    self:set_error("Cannot load the file " .. source_path .. ", please verify the file integrity")
+                    local source_path = self._dir .. self._events_files[event].source_file
+                    local valid, buffer = pcall(function () return XAudio.Buffer:new(source_path) end)
+                    if valid then
+                        self._events_buffers[event].source_buffer = buffer
+                    else
+                        self:set_error("Cannot load the file " .. source_path .. ", please verify the file integrity")
+                    end
                 end
+
             end
         end
         res.buffer = self._events_buffers[event].source_buffer
