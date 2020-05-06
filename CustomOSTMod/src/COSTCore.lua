@@ -238,9 +238,11 @@ if COSTConfig.do_hook then
     end)
 
     -- Compatibility with Music Control
-    Hooks:PreHook(Music, "Call", "CustomOSTMusicControlCompats", function (_, _, song, event, _)
-        Global.music_manager.current_track = song
-    end)
+    if Music then
+        Hooks:PreHook(Music, "Call", "CustomOSTMusicControlCompats", function (_, _, song, event, _)
+            Global.music_manager.current_track = song
+        end)
+    end
 
 end
 
