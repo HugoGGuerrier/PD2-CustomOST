@@ -56,13 +56,13 @@ function COSTMusicManager:track_listen_start (event, track)
                 COSTMusicManager:stop_custom(false, 1)
 
                 -- Play the custom music
-                COSTLogger:dev_log("Custom track listen start " .. custom_track:get_id() .. " - " .. trad_event .. " !")
-                COSTMusicManager:play_custom(false, false, 1)
+                COSTLogger:log_dev("Custom track listen start " .. custom_track:get_id() .. " - " .. trad_event .. " !")
+                COSTMusicManager:play_custom(false, 1, {forced = "main"})
 
             end
         else
             COSTMusicManager:stop_and_clean(false, 0)
-            COSTLogger:dev_log("Other track listen start !")
+            COSTLogger:log_dev("Other track listen start !")
         end
 
     end
@@ -81,7 +81,7 @@ end
 function COSTMusicManager:track_listen_stop ()
     if COSTMusicManager.current_track then
         COSTMusicManager:stop_and_clean(true, 1)
-        COSTLogger:dev_log("Track listen stop !")
+        COSTLogger:log_dev("Track listen stop !")
     end
 end
 
@@ -110,7 +110,7 @@ function COSTMusicManager:post_event (event)
                 -- Get the current track
                 local custom_track = COSTTrackManager.custom_tracks_map[COSTMusicManager.current_track]
 
-                COSTLogger:dev_log(trad_event .. " posted !")
+                COSTLogger:log_dev(trad_event .. " posted !")
 
                 if custom_track.cost_type == "CustomOSTTrack" then
 
@@ -119,26 +119,26 @@ function COSTMusicManager:post_event (event)
                     if old_event then
                         COSTMusicManager:stop_custom(custom_track:get_event_params(old_event).fade_out ~= 0, custom_track:get_event_params(old_event).fade_out)
                     end
-                    COSTMusicManager:play_custom(true, custom_track:get_event_params(trad_event).fade_in ~= 0, custom_track:get_event_params(trad_event).fade_in)
+                    COSTMusicManager:play_custom(custom_track:get_event_params(trad_event).fade_in ~= 0, custom_track:get_event_params(trad_event).fade_in, {play_start = true})
 
                 elseif custom_track.cost_type == "CustomOSTSimpleTrack" then
 
                     if COSTMusicManager.current_event == "setup" then
-                        COSTMusicManager.volume_alterators.event = 0.65
+                        COSTMusicManager.volume_alterators.event = 0.5
                     elseif COSTMusicManager.current_event == "control" then
-                        COSTMusicManager.volume_alterators.event = 0.4
+                        COSTMusicManager.volume_alterators.event = 0.35
                     elseif COSTMusicManager.current_event == "buildup" then
                         COSTMusicManager.volume_alterators.event = 0
                     elseif COSTMusicManager.current_event == "assault" then
                         COSTMusicManager.volume_alterators.event = 0
                     end
 
-                    if not COSTMusicManager.x_source then
-                        COSTMusicManager:play_custom(false, false, 0)
+                    if not COSTMusicManager.x_source or not COSTMusicManager.x_source._cost_buffer then
+                        COSTMusicManager:play_custom(false, 0)
                     else
                         if COSTMusicManager.x_source._cost_buffer.track ~= COSTMusicManager.current_track then
                             COSTMusicManager:stop_custom(false, 0)
-                            COSTMusicManager:play_custom(false, false, 0)
+                            COSTMusicManager:play_custom(false, 0)
                         end
                     end
 
@@ -148,7 +148,7 @@ function COSTMusicManager:post_event (event)
             COSTMusicManager:stop_and_clean(true, 1)
         end
     else
-        COSTMusicManager:stop_and_clean(false, 0)
+        COSTMusicManager:stop_and_clean(true, 1)
     end
 end
 
@@ -164,19 +164,29 @@ end
 
 
 -- Function to play a custom track in the wanted event
-function COSTMusicManager:play_custom (play_start, fade_in, fade_duration)
+function COSTMusicManager:play_custom (fade_in, fade_duration, flags)
+    -- Ensure the flag is not nil
+    flags = flags or {}
+
     if not COSTMusicManager.x_source or COSTMusicManager.x_source:is_closed() then
         local custom_track = COSTTrackManager.custom_tracks_map[COSTMusicManager.current_track]
 
         if custom_track and COSTMusicManager.current_event then
             -- Get the custom buffer and check the errors
-            local cost_buffer = custom_track:get_cost_buffer(COSTMusicManager.current_event, play_start)
+            local cost_buffer = custom_track:get_cost_buffer(COSTMusicManager.current_event, flags.play_start == true, flags.forced)
             if not cost_buffer.error then
+                if #cost_buffer.warnings > 0 then
+                    local msg = "Track " .. custom_track:get_name() .. " raise warnings :\n"
+                    for _, warn in pairs(cost_buffer.warnings) do
+                        msg = msg .. "- " .. warn .. "\n"
+                    end
+                    COSTLogger:show_warn(msg)
+                end
+
                 COSTMusicManager.x_source = COSTXSource:new(cost_buffer)
                 if fade_in then
                     COSTMusicManager.x_source:fade_in(fade_duration)
                 end
-                return true
             else
                 COSTLogger:show_err(cost_buffer.error)
             end
@@ -184,7 +194,6 @@ function COSTMusicManager:play_custom (play_start, fade_in, fade_duration)
             COSTLogger:log_err("Try to start a custom track with values current_event=" .. (COSTMusicManager.current_event or "nil") .. " current_track=" .. (COSTMusicManager.current_track or "nil"))
         end
     end
-    return false
 end
 
 
@@ -203,9 +212,13 @@ end
 
 -- Function to signal a start track end
 function COSTMusicManager:start_finish (event)
-    COSTLogger:dev_log("End of the " .. event .. " start source")
+    COSTLogger:log_dev("End of the " .. event .. " start source")
     if event == COSTMusicManager.current_event then
-        COSTMusicManager:play_custom(false, false, 0)
+        local forced = "main"
+        if COSTMusicManager.x_source._cost_buffer.alt then
+            forced = "alt"
+        end
+        COSTMusicManager:play_custom(false, 0, {forced = forced})
     end
 end
 
@@ -267,16 +280,16 @@ function COSTMusicManager:speak_mission ()
             elseif COSTMusicManager.current_event == "control" then
                 COSTMusicManager.volume_alterators.speak = 0.65
             elseif COSTMusicManager.current_event == "buildup" then
-                COSTMusicManager.volume_alterators.speak = 0.5
+                COSTMusicManager.volume_alterators.speak = 0.53
             elseif COSTMusicManager.current_event == "assault" then
-                COSTMusicManager.volume_alterators.speak = 0.4
+                COSTMusicManager.volume_alterators.speak = 0.5
             end
         end
     end
 end
 
 
--- Function to call when nobody speak
+-- Function to call when someone stop to speak
 function COSTMusicManager:stop_speak ()
     COSTMusicManager.volume_alterators.speak = 0
 end
@@ -333,6 +346,6 @@ end
 function COSTMusicManager:flash_grenade (sound_factor)
     if COSTMusicManager.current_track then
         COSTMusicManager.timers.flashbang = COSTTimer:new(10)
-        COSTMusicManager.timers.flashbang:set_cursor(5.2 - (10 * sound_factor))
+        COSTMusicManager.timers.flashbang:set_cursor(5.5 - (10 * sound_factor))
     end
 end

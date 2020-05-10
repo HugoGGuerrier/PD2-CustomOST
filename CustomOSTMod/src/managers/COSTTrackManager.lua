@@ -59,9 +59,11 @@ function COSTTrackManager:create_track_from_json (track_file, dir)
         return nil
     end
 
-    track_table.dir = dir
-    track_table.fade_duration = track_table.fade_duration or COSTConfig.default_fade_duration
-    COSTTrackManager:_add_standard_track(track_table)
+    if track_table and type(track_table) == "table" then
+        track_table.dir = dir
+        track_table.fade_duration = track_table.fade_duration or COSTConfig.default_fade_duration
+        COSTTrackManager:_add_standard_track(track_table)
+    end
 end
 
 
@@ -136,6 +138,11 @@ function COSTTrackManager:create_track_from_xml (track_file, dir)
                             local event = COSTTrackManager.beard_lib_event_trad[ev_v.name]
                             new_track_table.events[event].start_file = ev_v.start_source
                             new_track_table.events[event].file = ev_v.source
+                            new_track_table.events[event].volume = ev_v.volume
+
+                            new_track_table.events[event].alt = ev_v.alt_source
+                            new_track_table.events[event].alt_start = ev_v.alt_start_source
+                            new_track_table.events[event].alt_chance = ev_v.alt_chance
                         end
                     end
                 end
@@ -187,11 +194,14 @@ function COSTTrackManager:_add_standard_track (track_table)
         if event == "anticipation" then event = "buildup" end
 
         new_track:set_event_start_file(event, params.start_file)
+        new_track:set_event_alt_start_file(event, params.alt_start)
         new_track:set_event_file(event, params.file)
+        new_track:set_event_alt_file(event, params.alt)
 
         new_track:set_event_volume(event, (params.volume or 1))
         new_track:set_event_fade_in(event, (params.fade_in or track_table.fade_duration))
         new_track:set_event_fade_out(event, (params.fade_out or track_table.fade_duration))
+        new_track:set_event_alt_chance(event, (params.alt_chance or 0))
     end
 
     -- Add the track to the array
@@ -226,7 +236,7 @@ function COSTTrackManager:load_tracks_loc ()
         content[menu_jukebox_screen_id] = track:get_name()
     end
     LocalizationManager:add_localized_strings(content, false)
-    COSTLogger:dev_log("Tracks localization loaded !")
+    COSTLogger:log_dev("Tracks localization loaded !")
 end
 
 
@@ -239,5 +249,5 @@ function COSTTrackManager:add_tracks_tweak()
             COSTLogger:log_err("Duplicate track id in the game track list")
         end
     end
-    COSTLogger:dev_log("Tracks tweaks loaded !")
+    COSTLogger:log_dev("Tracks tweaks loaded !")
 end

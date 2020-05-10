@@ -1,6 +1,14 @@
 Custom OST Changelog
 
-> ### 0.13a
+> ### 0.14a
+
+* Add the alt source feature and the compatibility with Beardlib Music Mod
+* Make the compatibility with the mod Music JukeBox Control : https://modworkshop.net/mod/24765
+* Add the warning messages to help users debug their music and understand why it is not working
+* Remake the music player architecture
+* Correct some miny bugs
+
+### 0.13a
 
 * Make compatibility with Music Control mod : https://modworkshop.net/mod/20833
 * Add a mod menu to set the options

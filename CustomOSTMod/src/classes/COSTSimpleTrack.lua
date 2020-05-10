@@ -61,7 +61,7 @@ function COSTSimpleTrack:is_valid ()
 end
 
 -- (Override) Function to get the cost buffer
-function COSTSimpleTrack:get_cost_buffer (event, play_start)
+function COSTSimpleTrack:get_cost_buffer (event, _, _)
     -- Prepare the result
     local res = {}
     res.cost_type = "CustomOSTBuffer"
@@ -70,12 +70,14 @@ function COSTSimpleTrack:get_cost_buffer (event, play_start)
     res.volume = self._volume
     res.is_looping = true
     res.is_start = false
+    res.alt = false
 
-    if not self._buffer then
+    if not self._loaded then
         self:load_files()
     end
     res.buffer = self._buffer
 
+    res.warnings = self._warnings
     res.error = self._error
     return res
 end
@@ -88,7 +90,7 @@ function COSTSimpleTrack:load_files ()
             local valid, buffer = pcall(function () return XAudio.Buffer:new(source_path) end)
             if valid then
                 self._buffer = buffer
-                COSTLogger:dev_log("Load " .. self._id .. " (simple track)")
+                COSTLogger:log_dev("Load " .. self._id .. " (simple track)")
             else
                 self:set_error("Cannot load the file " .. source_path .. ", please verify the file integrity")
             end
@@ -96,5 +98,6 @@ function COSTSimpleTrack:load_files ()
     end
 
     -- Log the loading success
-    COSTLogger:dev_log(self._id .. " loaded ! (simple track)")
+    self._loaded = true
+    COSTLogger:log_dev(self._id .. " loaded ! (simple track)")
 end

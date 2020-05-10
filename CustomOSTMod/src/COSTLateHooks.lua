@@ -83,6 +83,6 @@ if COSTConfig.do_hook then
         end
     end)
 
-    COSTLogger:dev_log("Late hooks loaded !")
+    COSTLogger:log_dev("Late hooks loaded !")
 
 end

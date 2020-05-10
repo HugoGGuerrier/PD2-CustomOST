@@ -12,6 +12,8 @@ function COSTTrackBase:init ()
     self._volume = 1
     self._dir = nil
     self._error = nil
+    self._warnings = {}
+    self._loaded = false
 end
 
 
@@ -61,6 +63,17 @@ function COSTTrackBase:set_dir (dir)
 end
 
 
+--Function to get the warnings
+function COSTTrackBase:get_warnings()
+    return self._warnings
+end
+
+-- Function to add a warning to display
+function COSTTrackBase:add_warning (msg)
+    table.insert(self._warnings, msg)
+end
+
+
 -- Function to get error
 function COSTTrackBase:get_error ()
     return self._error
@@ -78,7 +91,7 @@ function COSTTrackBase:is_valid ()
 end
 
 -- Function to override
-function COSTTrackBase:get_cost_buffer (event, play_start)
+function COSTTrackBase:get_cost_buffer (event, play_start, forced)
     COSTLogger:log_warn("Hey dev, you must override the get_cost_buffer method !!!")
 end
 

@@ -32,7 +32,7 @@ if file.DirectoryExists(bases_dir_path) then
         dofile(bases_dir_path .. file)
     end
 else
-    COSTLogger:log_err("[CustomOST] [Error] : Cannot find the bases source directory, please reinstall this mod !")
+    COSTLogger:log_err("Cannot find the bases source directory, please reinstall this mod !")
     return nil
 end
 
@@ -44,7 +44,7 @@ if file.DirectoryExists(classes_dir_path) then
         dofile(classes_dir_path .. file)
     end
 else
-    COSTLogger:log_err("[CustomOST] [Error] : Cannot find the classes source directory, please reinstall this mod !")
+    COSTLogger:log_err("Cannot find the classes source directory, please reinstall this mod !")
     return nil
 end
 
@@ -56,7 +56,7 @@ if file.DirectoryExists(managers_dir_path) then
         dofile(managers_dir_path .. file)
     end
 else
-    COSTLogger:log_err("[CustomOST] [Error] : Cannot find the managers source directory, please reinstall this mod !")
+    COSTLogger:log_err("Cannot find the managers source directory, please reinstall this mod !")
     return nil
 end
 
@@ -125,7 +125,7 @@ if file.DirectoryExists(tracks_dir_path) then
         COSTTrackManager:load_tracks_files()
     end
 else
-    COSTLogger:dev_log("Tracks directory was not found... The mod has created one")
+    COSTLogger:log_dev("Tracks directory was not found... The mod has created one")
     file.MakeDir(tracks_dir_path)
 end
 
@@ -202,6 +202,7 @@ Hooks:Add("MenuManagerPopulateCustomMenus", "MenuManagerPopulateCustomMenus_Exam
     MenuHelper:LoadFromJsonFile(menu_file, {}, COSTConfig:get_menu_params())
 end)
 
+
 ------ Create the hooks to insert custom tracks in the game ------
 
 
@@ -244,10 +245,17 @@ if COSTConfig.do_hook then
         end)
     end
 
+    -- Compatibility with Music Jukebox Control
+    if MusicJukeBoxControl then
+        Hooks:PreHook(MusicJukeBoxControl, "force_stop_music", "CustomOSTMusicJukeboxSwitchTrack", function ()
+            COSTMusicManager:stop_custom(false, 0)
+        end)
+    end
+
 end
 
 
 ------ End of the core ------
 
 
-COSTLogger:dev_log("Core ended correctly !")
+COSTLogger:log_dev("Core ended correctly !")
