@@ -24,6 +24,16 @@ function file.MakeDir (dir_to_create)
 end
 
 
+-- Get a file extension
+function file.GetExtension (file)
+    local splited_name = split_string(file, ".")
+    if #splited_name > 1 then
+        return splited_name[#splited_name]
+    end
+    return nil
+end
+
+
 -- Split a string with a token
 function split_string (str, token)
     token = token or "%s"

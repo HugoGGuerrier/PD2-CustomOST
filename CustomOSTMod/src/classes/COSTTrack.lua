@@ -189,16 +189,16 @@ function COSTTrack:is_valid ()
         -- Verify the start source file
         if start_source_path then
             if not file.FileExists(start_source_path) then
-                self._events_files[event].start_source_file = nil
                 self:add_warning("Start file " .. start_source_path .. " is missing or unreadable")
+                self._events_files[event].start_source_file = nil
             end
         end
 
         -- Verify the alt start source file
         if alt_start_source_path then
             if not file.FileExists(alt_start_source_path) then
-                self._events_files[event].alt_start_source_file = nil
                 self:add_warning("Alt start file " .. alt_start_source_path .. " is missing or unreadable")
+                self._events_files[event].alt_start_source_file = nil
             end
         end
 
@@ -214,8 +214,8 @@ function COSTTrack:is_valid ()
         -- Verify the alt source file
         if alt_source_path then
             if not file.FileExists(alt_source_path) then
-                self._events_files[event].alt_source_file = nil
                 self:add_warning("Alt file " .. alt_source_path .. " is missing or unreadable")
+                self._events_files[event].alt_source_file = nil
             end
         end
     end
@@ -238,39 +238,44 @@ function COSTTrack:get_cost_buffer (event, play_start, forced)
         self:load_files()
     end
 
-    -- Get a random to choose the alt or the main
+    -- Get a random to choose the alt or the main and prepare the default buffer settings
     local alt_rand = math.random()
 
-    if self._events_buffers[event].alt_source_buffer and forced ~= "main" and (alt_rand < self._events_params[event].alt_chance or forced == "alt") then
-        if play_start and self._events_buffers[event].alt_start_source_buffer then
-            res.buffer = self._events_buffers[event].alt_start_source_buffer
+    local buffer_to_return = "source_buffer"
+    res.alt = nil
+    res.is_looping = true
+    res.is_start = false
 
-            res.is_looping = false
-            res.is_start = true
-        else
-            res.buffer = self._events_buffers[event].alt_source_buffer
-
-            res.is_looping = true
-            res.is_start = false
+    if self._events_buffers[event].alt_source_buffer then
+        if forced ~= "main" and (alt_rand <= self._events_params[event].alt_chance or forced == "alt") then
+            buffer_to_return = "alt_source_buffer"
         end
-
-        res.alt = true
-    else
-        if play_start and self._events_buffers[event].start_source_buffer then
-            res.buffer = self._events_buffers[event].start_source_buffer
-
-            res.is_looping = false
-            res.is_start = true
-        else
-            res.buffer = self._events_buffers[event].source_buffer
-
-            res.is_looping = true
-            res.is_start = false
-        end
-
-        res.alt = false
     end
 
+    if play_start then
+
+        if self._events_buffers[event].start_source_buffer then
+            buffer_to_return = "start_source_buffer"
+
+            res.is_looping = false
+            res.is_start = true
+        end
+
+        if self._events_buffers[event].alt_start_source_buffer then
+            if forced ~= "main" and (alt_rand <= self._events_params[event].alt_chance or forced == "alt") then
+                buffer_to_return = "alt_start_source_buffer"
+
+                res.alt = true
+                res.is_looping = false
+                res.is_start = true
+            else
+                res.alt = false
+            end
+        end
+
+    end
+
+    res.buffer = self._events_buffers[event][buffer_to_return]
     res.warnings = self._warnings
     res.error = self._error
     return res

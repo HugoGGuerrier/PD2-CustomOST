@@ -8,8 +8,9 @@ COSTTrackBase = COSTTrackBase or class()
 function COSTTrackBase:init ()
     self.cost_type = "CustomOSTTrackBase"
     self._id = nil
-    self._name = "Default track name"
+    self._name = nil
     self._volume = 1
+    self._context = nil
     self._dir = nil
     self._error = nil
     self._warnings = {}
@@ -52,6 +53,19 @@ function COSTTrackBase:set_volume (volume)
 end
 
 
+-- Function to test a context
+function COSTTrackBase:get_context ()
+    return self._context
+end
+
+-- Function to add a context
+function COSTTrackBase:set_context (context)
+    if context then
+        self._context = context
+    end
+end
+
+
 -- Function to get directory
 function COSTTrackBase:get_dir ()
     return self._dir
@@ -80,8 +94,8 @@ function COSTTrackBase:get_error ()
 end
 
 -- Function to set the error
-function COSTTrackBase:set_error (error)
-    self._error = self._error or error
+function COSTTrackBase:set_error (msg)
+    self._error = self._error or msg
 end
 
 

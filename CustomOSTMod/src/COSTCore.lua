@@ -112,11 +112,10 @@ if file.DirectoryExists(tracks_dir_path) then
     -- Load all the simple music files
     local tracks_files = file.GetFiles(tracks_dir_path)
 
-    for _, file in pairs(tracks_files) do
-        local splited_file_name = split_string(file, ".")
-        local file_extension = splited_file_name[#splited_file_name]
+    for _, track_file in pairs(tracks_files) do
+        local file_extension = file.GetExtension(track_file)
         if file_extension == "ogg" or file_extension == "OGG" then
-            COSTTrackManager:create_track_from_ogg(file, tracks_dir_path)
+            COSTTrackManager:create_track_from_ogg(track_file, tracks_dir_path)
         end
     end
 
@@ -217,8 +216,8 @@ if COSTConfig.do_hook then
         COSTTrackManager:add_tracks_tweak()
     end)
 
-    -- Create hooks to make the custom music play
-    Hooks:PostHook(MusicManager, "track_listen_start", "CustomOSTTrackListerStart", function(_, event, track)
+    -- Create hooks to make the custom heist music play in the preplannig menu
+    Hooks:PostHook(MusicManager, "track_listen_start", "CustomOSTTrackListenStart", function(_, event, track)
         COSTMusicManager:track_listen_start(event, track)
     end)
 
@@ -226,16 +225,31 @@ if COSTConfig.do_hook then
         COSTMusicManager:track_listen_stop()
     end)
 
-    Hooks:PostHook(MusicManager, "on_mission_end", "CustomOSTMissionEnd", function ()
-        COSTMusicManager:stop_and_clean(true, 1)
+    -- Create hooks to make the stealth music play in the preplanning menu
+    Hooks:PostHook(MusicManager, "music_ext_listen_start", "CustomOSTStealthTrackListenStart", function(_, music_ext)
+        COSTMusicManager:track_listen_start("music_stealth_control", music_ext)
     end)
 
+    Hooks:PostHook(MusicManager, "stop_listen_all", "CustomOSTStealthTrackListenStop", function()
+        COSTMusicManager:track_listen_stop()
+    end)
+
+    Hooks:PostHook(MusicManager, "music_ext_listen_stop", "CustomOSTStealthTrackListenStopMenu", function()
+        COSTMusicManager:track_listen_stop()
+    end)
+
+    -- Create hook to make the music playting during the mission
+    Hooks:PostHook(MusicManager, "post_event", "CustomOSTPostEvent", function(_, name)
+        COSTMusicManager:post_event(name)
+    end)
+    
     Hooks:PostHook(MusicManager, "stop", "CustomOSTStop", function()
         COSTMusicManager:stop_and_clean(false, 0)
     end)
 
-    Hooks:PostHook(MusicManager, "post_event", "CustomOSTPostEvent", function(_, name)
-        COSTMusicManager:post_event(name)
+    Hooks:PostHook(MusicManager, "on_mission_end", "CustomOSTMissionEnd", function ()
+        COSTMusicManager.in_heist = false
+        COSTMusicManager:stop_and_clean(true, 1)
     end)
 
     -- Compatibility with Music Control

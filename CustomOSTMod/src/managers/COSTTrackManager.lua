@@ -167,6 +167,7 @@ function COSTTrackManager:_add_simple_track (simple_track_table)
     new_simple_track:set_id(simple_track_table.id)
     new_simple_track:set_name(simple_track_table.name)
     new_simple_track:set_volume(simple_track_table.volume)
+    new_simple_track:set_context("heist")
     new_simple_track:set_dir(simple_track_table.dir)
     new_simple_track:set_file(simple_track_table.file)
 
@@ -186,6 +187,7 @@ function COSTTrackManager:_add_standard_track (track_table)
     new_track:set_id(track_table.id)
     new_track:set_name(track_table.name)
     new_track:set_volume(track_table.volume or 1)
+    new_track:set_context(track_table.context or "heist")
     new_track:set_dir(track_table.dir)
 
     for event, params in pairs(track_table.events) do
@@ -243,11 +245,25 @@ end
 -- Add the tracks tweaks to make them apear in the game menu
 function COSTTrackManager:add_tracks_tweak()
     for _, track in pairs(COSTTrackManager.custom_tracks_ordered) do
-        if not tweak_data.music.track_list[track:get_id()] then
-            table.insert(tweak_data.music.track_list, {track = track:get_id()})
-        else
-            COSTLogger:log_err("Duplicate track id in the game track list")
+
+        if track:get_context() == "heist" then
+
+            if not tweak_data.music.track_list[track:get_id()] then
+                table.insert(tweak_data.music.track_list, {track = track:get_id()})
+            else
+                COSTLogger:log_err("Duplicate track id : " .. track:get_id() .. " in the game track list")
+            end
+
+        elseif track:get_context() == "stealth" then
+
+            if not tweak_data.music.track_ghost_list[track:get_id()] then
+                table.insert(tweak_data.music.track_ghost_list, {track = track:get_id()})
+            else
+                COSTLogger:log_err("Duplicate track id : " .. track:get_id() .. " in the game track stealth list")
+            end
+
         end
+
     end
     COSTLogger:log_dev("Tracks tweaks loaded !")
 end

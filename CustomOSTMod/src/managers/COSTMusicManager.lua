@@ -5,20 +5,26 @@ COSTMusicManager = COSTMusicManager or {}
 
 COSTMusicManager.current_track = nil
 COSTMusicManager.current_event = nil
+COSTMusicManager.in_heist = false
 COSTMusicManager.x_source = nil
 
 COSTMusicManager.events_table = {
     music_heist_setup = "setup",
+    music_stealth_setup = "setup",
+    suspense_1 = "setup",
+    
     music_heist_control = "control",
+    music_stealth_control = "control",
+    suspense_2 = "control",
+    
     music_heist_anticipation = "buildup",
-    music_heist_assault = "assault"
-}
+    music_stealth_anticipation = "buildup",
+    suspense_3 = "buildup",
+    suspense_4 = "buildup",
 
-COSTMusicManager.events_rtable = {
-    setup = "music_heist_setup",
-    control = "music_heist_control",
-    buildup = "music_heist_anticipation",
-    assault = "music_heist_assault"
+    music_heist_assault = "assault",
+    music_stealth_assault = "assault",
+    suspense_5 = "assault"
 }
 
 COSTMusicManager.volume_alterators = {
@@ -53,11 +59,11 @@ function COSTMusicManager:track_listen_start (event, track)
 
                 -- Stop all other music
                 Global.music_manager.source:stop()
-                COSTMusicManager:stop_custom(false, 1)
+                COSTMusicManager:stop_custom(false, 0)
 
                 -- Play the custom music
                 COSTLogger:log_dev("Custom track listen start " .. custom_track:get_id() .. " - " .. trad_event .. " !")
-                COSTMusicManager:play_custom(false, 1, {forced = "main"})
+                COSTMusicManager:play_custom(false, 0, {forced = "main"})
 
             end
         else
@@ -79,7 +85,7 @@ end
 
 -- Function to handle stop music preview in the loadout menu
 function COSTMusicManager:track_listen_stop ()
-    if COSTMusicManager.current_track then
+    if COSTMusicManager.current_track and not COSTMusicManager.in_heist then
         COSTMusicManager:stop_and_clean(true, 1)
         COSTLogger:log_dev("Track listen stop !")
     end
@@ -89,7 +95,7 @@ end
 -- Fuction to handle event changing in the heist
 function COSTMusicManager:post_event (event)
     -- Get the current track even without excplicit selection
-    local current_track = Global.music_manager.current_track
+    local current_track = Global.music_manager.current_track or Global.music_manager.current_music_ext
 
     -- Verify that the event post should be handled
     if COSTTrackManager.custom_tracks_map[current_track] then
@@ -101,6 +107,7 @@ function COSTMusicManager:post_event (event)
         -- Make the event changing
         if COSTMusicManager.events_table[event] then
             local trad_event = COSTMusicManager.events_table[event]
+            COSTMusicManager.in_heist = true
 
             if COSTMusicManager.current_event ~= trad_event then
                 -- Save and update the event
@@ -144,7 +151,8 @@ function COSTMusicManager:post_event (event)
 
                 end
             end
-        else
+        elseif event ~= nil then
+            COSTMusicManager.in_heist = false
             COSTMusicManager:stop_and_clean(true, 1)
         end
     else
@@ -166,7 +174,9 @@ end
 -- Function to play a custom track in the wanted event
 function COSTMusicManager:play_custom (fade_in, fade_duration, flags)
     -- Ensure the flag is not nil
-    flags = flags or {}
+    if flags == nil then
+        flags = {}
+    end
 
     if not COSTMusicManager.x_source or COSTMusicManager.x_source:is_closed() then
         local custom_track = COSTTrackManager.custom_tracks_map[COSTMusicManager.current_track]
@@ -175,6 +185,8 @@ function COSTMusicManager:play_custom (fade_in, fade_duration, flags)
             -- Get the custom buffer and check the errors
             local cost_buffer = custom_track:get_cost_buffer(COSTMusicManager.current_event, flags.play_start == true, flags.forced)
             if not cost_buffer.error then
+
+                -- Show the tracks warnings
                 if #cost_buffer.warnings > 0 then
                     local msg = "Track " .. custom_track:get_name() .. " raise warnings :\n"
                     for _, warn in pairs(cost_buffer.warnings) do
@@ -183,10 +195,12 @@ function COSTMusicManager:play_custom (fade_in, fade_duration, flags)
                     COSTLogger:show_warn(msg)
                 end
 
+                -- Play the custom buffer
                 COSTMusicManager.x_source = COSTXSource:new(cost_buffer)
                 if fade_in then
                     COSTMusicManager.x_source:fade_in(fade_duration)
                 end
+
             else
                 COSTLogger:show_err(cost_buffer.error)
             end
@@ -214,11 +228,13 @@ end
 function COSTMusicManager:start_finish (event)
     COSTLogger:log_dev("End of the " .. event .. " start source")
     if event == COSTMusicManager.current_event then
-        local forced = "main"
-        if COSTMusicManager.x_source._cost_buffer.alt then
-            forced = "alt"
+        local s_forced = nil
+        if COSTMusicManager.x_source._cost_buffer.alt == true then
+            s_forced = "alt"
+        elseif COSTMusicManager.x_source._cost_buffer.alt == false then
+            s_forced = "main"
         end
-        COSTMusicManager:play_custom(false, 0, {forced = forced})
+        COSTMusicManager:play_custom(false, 0, {forced = s_forced})
     end
 end
 
@@ -242,7 +258,7 @@ function COSTMusicManager:custom_update (dt, paused)
 end
 
 
--- Get the volumae factor
+-- Get the volume factor
 function COSTMusicManager:get_volume_changer ()
     -- Get the decline factor for the bleedout state
     local decline_factor = 1
@@ -320,7 +336,7 @@ function COSTMusicManager:hit_sound ()
     if COSTMusicManager.current_track then
         COSTMusicManager.timers.hit = COSTTimer:new(0.6)
         COSTMusicManager.timers.hit:set_callback(function () COSTMusicManager.volume_alterators.hit = 0 end)
-        COSTMusicManager.volume_alterators.hit = 0.37
+        COSTMusicManager.volume_alterators.hit = 0.34
     end
 end
 

@@ -1,12 +1,20 @@
 Custom OST Changelog
 
-> ### 0.14a
+> ### 0.15a
+
+* You can now add stealth tracks like standard tracks (Read the manual carefully)
+* Correct the alt source behavior
+* Patch a bug that make the game crashs in some conditions
+* Optimize track loading
+* Optimize code
+
+### 0.14a
 
 * Add the alt source feature and the compatibility with Beardlib Music Mod
 * Make the compatibility with the mod Music JukeBox Control : https://modworkshop.net/mod/24765
 * Add the warning messages to help users debug their music and understand why it is not working
 * Remake the music player architecture
-* Correct some miny bugs
+* Correct some mini bugs
 
 ### 0.13a
 
