@@ -99,17 +99,23 @@ function COSTTrackBase:set_error (msg)
 end
 
 
+-- Function to get if the track was loaded
+function COSTTrackBase:is_loaded ()
+    return self._loaded
+end
+
+
 -- Function to override
 function COSTTrackBase:is_valid ()
-    COSTLogger:log_warn("Hey dev, you must override the is_valid method !!!")
+    COSTLogger:log_warn("Unoverriden method : COSTTrackBase:is_valid")
 end
 
 -- Function to override
 function COSTTrackBase:get_cost_buffer (event, play_start, forced)
-    COSTLogger:log_warn("Hey dev, you must override the get_cost_buffer method !!!")
+    COSTLogger:log_warn("Unoverriden method : COSTTrackBase:get_cost_buffer")
 end
 
 -- Function to override
 function COSTTrackBase:load_files ()
-    COSTLogger:log_warn("Hey dev, you must override the load_files method !!!")
+    COSTLogger:log_warn("Unoverriden method : COSTTrackBase:load_files")
 end

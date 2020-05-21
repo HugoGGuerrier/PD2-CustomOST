@@ -1,6 +1,15 @@
 Custom OST Changelog
 
-> ### 0.15a
+> ### 0.16a
+
+* DISCLAIMER : This is a boring update
+* Rework the whole mod to make the code more robust and simple to maintain
+* Now full OOP (God bless my soul)
+* Encapsulate all classes
+* Correct some bugs with the stealth tracks
+* Add the dynamic volume toogle in options
+
+### 0.15a
 
 * You can now add stealth tracks like standard tracks (Read the manual carefully)
 * Correct the alt source behavior

@@ -7,6 +7,7 @@ COSTTimer = COSTTimer or class()
 -- Init a new timer with the wanted duration
 function COSTTimer:init (duration)
     self.cost_type = "CustomOSTTimer"
+    
     self._duration = duration
     self._cursor = 0
     self._delay = 0

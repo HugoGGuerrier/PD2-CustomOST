@@ -65,7 +65,6 @@ function COSTSimpleTrack:get_cost_buffer (event, _, _)
     -- Prepare the result
     local res = {}
     res.cost_type = "CustomOSTBuffer"
-    res.event = event
     res.track = self._id
     res.volume = self._volume
     res.is_looping = true

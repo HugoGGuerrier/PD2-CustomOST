@@ -26,6 +26,16 @@
         },
 
         {
+            "type" : "toggle",
+            "id" : "costn_dynamic_volume_toogle",
+            "title" : "costn_dynamic_volume_toogle_title",
+            "description" : "costn_dynamic_volume_toogle_desc",
+            "callback" : "costn_dynamic_volume_toogle",
+            "value" : "dynamic_volume",
+            "default_value" : true
+        },
+
+        {
             "type" : "divider",
             "size" : 10
         },

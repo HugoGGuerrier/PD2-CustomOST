@@ -3,7 +3,7 @@
     "description": "A light mod to add custom heist music with dynamic integration.",
     "author": "Hugo Guerrier",
     "contact": "hugogguerrier@gmail.com",
-    "version": "0.15a",
+    "version": "0.16a",
     "priority" : 900,
     "image" : "res/logo_256.png",
 
@@ -14,7 +14,7 @@
         },
         {
             "hook_id": "lib/setups/gamesetup",
-            "script_path": "src/COSTLateHooks.lua"
+            "script_path": "src/COSTLateCore.lua"
         }
     ],
 

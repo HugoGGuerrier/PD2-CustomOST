@@ -35,6 +35,7 @@ COSTConfig.do_hook = true
 COSTConfig.load_timeout = 4
 COSTConfig.dynamic_load = false
 COSTConfig.default_fade_duration = 1
+COSTConfig.dynamic_volume = true
 
 
 -- Function to load the mod config from a config file
@@ -50,6 +51,7 @@ function COSTConfig:load_config ()
             COSTConfig.load_timeout = config_json_table.load_timeout
             COSTConfig.dynamic_load = config_json_table.dynamic_load
             COSTConfig.default_fade_duration = config_json_table.default_fade_duration
+            COSTConfig.dynamic_volume = config_json_table.dynamic_volume
         end
     else
         self:save_config()
@@ -64,7 +66,8 @@ function COSTConfig:save_config ()
         do_hook = COSTConfig.do_hook,
         load_timeout = COSTConfig.load_timeout,
         dynamic_load = COSTConfig.dynamic_load,
-        default_fade_duration = COSTConfig.default_fade_duration
+        default_fade_duration = COSTConfig.default_fade_duration,
+        dynamic_volume = COSTConfig.dynamic_volume
     }
 
     local f = io.open(COSTConfig.config_file, "w")
@@ -86,6 +89,8 @@ function COSTConfig:get_menu_params ()
 
     local _, default_fade_duration = pcall(function () for i, duration in pairs(COSTConfig.fade_duration_trad) do if duration == COSTConfig.default_fade_duration then return i end end return nil end)
     res.default_fade_duration = default_fade_duration
-    
+
+    res.dynamic_volume = COSTConfig.dynamic_volume
+
     return res
 end

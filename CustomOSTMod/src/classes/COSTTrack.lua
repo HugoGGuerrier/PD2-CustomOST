@@ -224,12 +224,12 @@ function COSTTrack:is_valid ()
     return true
 end
 
+
 -- (Override) Function to get the cost buffer of an event
 function COSTTrack:get_cost_buffer (event, play_start, forced)
     -- Init the result
     local res = {}
     res.cost_type = "CustomOSTBuffer"
-    res.event = event
     res.track = self._id
     res.volume = self._volume * self._events_params[event].volume
 
@@ -280,6 +280,7 @@ function COSTTrack:get_cost_buffer (event, play_start, forced)
     res.error = self._error
     return res
 end
+
 
 -- (Override) Function to load the files into the buffers
 function COSTTrack:load_files ()

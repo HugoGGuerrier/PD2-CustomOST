@@ -12,6 +12,9 @@
     "costn_default_fade_duration_choice_5": "2.5 sec",
     "costn_default_fade_duration_choice_6": "3 sec",
 
+    "costn_dynamic_volume_toogle_title": "Dynamic volume management",
+    "costn_dynamic_volume_toogle_desc": "Enable/Disable the dynamic volume management (i.e. Volume gets low when Bain talks)",
+
     "costn_dynamic_load_toogle_title": "Dynamic track loading",
     "costn_dynamic_load_toogle_desc": "Enable/Disable the dynamic track loading - Load a track only when you choose it - Recommended if you have more than 200MB of music (Default is off)",
 
